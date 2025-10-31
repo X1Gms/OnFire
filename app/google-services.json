@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2717343863",
+    "project_id": "onfire-padm",
+    "storage_bucket": "onfire-padm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2717343863:android:2b970689ac883199ec2672",
+        "android_client_info": {
+          "package_name": "com.example.onfire_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgBsNxc290uAj1veiPFYgoDHybAFrXKYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

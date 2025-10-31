@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="space_2">8dp</dimen>
+    <dimen name="space_4">16dp</dimen>
+    <dimen name="space_6">24dp</dimen>
+    <dimen name="space_8">32dp</dimen>
+    <dimen name="field_height">56dp</dimen>
+</resources>
