@@ -1,25 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.onfire_project">
+    package="com.example.onfire_project" >
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_onfire_logo"
-        android:roundIcon="@drawable/ic_onfire_logo"
         android:label="@string/app_name"
-        android:theme="@style/Theme.OnFire">
-
-        <activity android:name=".AddInfoActivity" android:exported="false" />
-        <activity android:name=".RecoverEmailActivity" android:exported="false" />
-        <activity android:name=".RegisterActivity" android:exported="false" />
-        <activity android:name=".LoginActivity" android:exported="false" />
-
-        <activity android:name=".HiActivity" android:exported="true">
+        android:roundIcon="@drawable/ic_onfire_logo"
+        android:theme="@style/Theme.OnFire" >
+        <activity
+            android:name=".RequestPermissionsActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".AddInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RecoverEmailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HiActivity"
+            android:exported="false" />
     </application>
+
 </manifest>

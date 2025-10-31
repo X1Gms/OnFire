@@ -1,6 +1,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/brand_bg"
+    android:background="@color/primary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
                 android:text="Let's Set More Details"
-                android:textColor="@color/brand_text"
+                android:textColor="@color/text"
                 android:textSize="30sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -55,7 +55,7 @@
                 <EditText
                     android:id="@+id/etFullName"
                     android:background="@drawable/edittext_red_border"
-                    android:textColor="@color/brand_text"
+                    android:textColor="@color/text"
                     android:inputType="textPersonName"
                     android:paddingStart="14dp"
                     android:padding="10dp"
@@ -90,7 +90,7 @@
                 <EditText
                     android:id="@+id/etAge"
                     android:background="@drawable/edittext_red_border"
-                    android:textColor="@color/brand_text"
+                    android:textColor="@color/text"
                     android:inputType="number"
                     android:paddingStart="14dp"
                     android:padding="10dp"
@@ -181,7 +181,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/edittext_red_border"
                         android:inputType="numberDecimal"
-                        android:textColor="@color/brand_text"
+                        android:textColor="@color/text"
                         android:paddingStart="14dp"
                         android:padding="10dp"
                         android:layout_height="58dp" />
@@ -251,7 +251,7 @@
                         android:layout_weight="1"
                         android:background="@drawable/edittext_red_border"
                         android:inputType="numberDecimal"
-                        android:textColor="@color/brand_text"
+                        android:textColor="@color/text"
                         android:paddingStart="14dp"
                         android:padding="10dp"
                         android:layout_height="58dp" />
@@ -290,8 +290,8 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGo"
             android:text="Good to Go"
-            android:backgroundTint="@color/brand_primary"
-            android:textColor="@color/brand_text"
+            android:backgroundTint="@color/secondary"
+            android:textColor="@color/text"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/space_8"
             android:layout_width="match_parent"

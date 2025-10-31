@@ -1,8 +1,11 @@
 <resources>
-    <color name="brand_primary">#C7452A</color>
-    <color name="brand_primary_variant">#C4826E</color>
-    <color name="brand_bg">#0B1930</color>
-    <color name="brand_text">#FFFFFF</color>
-    <color name="brand_muted">#A7ADC7</color>
-    <color name="white">#FFFFFF</color>
+    <color name="primary">#0B1930</color>
+    <color name="secondary">#C7452A</color>
+    <color name="text_gray">#C4826E</color>
+    <color name="text">#FFFFFF</color>
+    <color name="text2">#A7ADC7</color>
+    <color name="forth">#C72A2A</color>
+    <color name="fifth">#06152C</color>
+    <color name="sixth">#041022</color>
+    <color name="success">#1A6308</color>
 </resources>
