@@ -1,301 +1,244 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/primary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
     <LinearLayout
         android:orientation="vertical"
-        android:paddingHorizontal="24dp"
-        android:paddingBottom="@dimen/space_6"
+        android:padding="32dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal|start"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        android:layout_height="wrap_content">
 
-        <!-- Título -->
+        <!-- TÍTULO -->
+        <TextView
+            android:text="Let's Set More Details"
+            android:textColor="@color/foreground"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:layout_width="226dp"
+            android:layout_height="wrap_content" />
+
+        <!-- FULL NAME -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/tilFullName"
+            android:hint="@string/hint_full_name"
+            app:hintEnabled="false"
+            app:boxStrokeColor="@color/input_stroke_color"
+            app:boxBackgroundColor="@color/muted"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxBackgroundMode="outline"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_and_button_height"
+            android:layout_marginTop="@dimen/space_6"
+            android:maxWidth="315dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFullName"
+                android:hint="@string/hint_full_name"
+                android:inputType="textPersonName"
+                android:includeFontPadding="false"
+                android:textColor="@color/foreground"
+                android:textColorHint="@color/muted_foreground"
+                android:paddingStart="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- AGE -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/tilAge"
+            android:layout_marginTop="@dimen/space_4"
+            android:hint="@string/hint_age"
+            app:hintEnabled="false"
+            app:boxStrokeColor="@color/input_stroke_color"
+            app:boxBackgroundColor="@color/muted"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusBottomEnd="14dp"
+            app:boxBackgroundMode="outline"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_and_button_height"
+            android:maxWidth="315dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etAge"
+                android:hint="@string/hint_age"
+                android:inputType="number"
+                android:includeFontPadding="false"
+                android:textColor="@color/foreground"
+                android:textColorHint="@color/muted_foreground"
+                android:paddingStart="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- SEX -->
         <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/space_6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="start">
+            android:maxWidth="315dp">
 
             <TextView
-                android:layout_width="226dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="Let's Set More Details"
-                android:textColor="@color/text"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+                android:text="@string/hint_sex"
+                android:textColor="@color/foreground"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/spSex"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/input_and_button_height"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/spinner_background"
+                android:paddingStart="14dp"
+                android:paddingEnd="36dp"
+                android:gravity="center_vertical|start"
+                android:spinnerMode="dropdown"
+                android:popupBackground="@color/muted"
+                android:textAlignment="viewStart" />
         </LinearLayout>
 
-        <!-- Full Name -->
+        <!-- WEIGHT -->
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/space_4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
+            android:maxWidth="315dp"
+            android:baselineAligned="false">
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxWidth="315dp">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:id="@+id/tilWeight"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                app:hintEnabled="false"
+                android:hint="@string/hint_weight"
+                app:boxStrokeColor="@color/input_stroke_color"
+                app:boxBackgroundColor="@color/muted"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxBackgroundMode="outline"
+                android:layout_height="@dimen/input_and_button_height">
 
-                <TextView
-                    android:text="Full Name"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <EditText
-                    android:id="@+id/etFullName"
-                    android:background="@drawable/edittext_red_border"
-                    android:textColor="@color/text"
-                    android:inputType="textPersonName"
-                    android:paddingStart="14dp"
-                    android:padding="10dp"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etWeight"
+                    android:hint="@string/hint_weight"
+                    android:inputType="numberDecimal"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/foreground"
+                    android:textColorHint="@color/muted_foreground"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
-                    android:layout_height="58dp" />
-            </LinearLayout>
+                    android:layout_height="match_parent" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <Spinner
+                android:id="@+id/spWeightUnit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="@dimen/input_and_button_height"
+                android:background="@drawable/spinner_background"
+                android:paddingStart="14dp"
+                android:paddingEnd="36dp"
+                android:gravity="center_vertical|start"
+                android:spinnerMode="dropdown"
+                android:popupBackground="@color/muted"
+                android:textAlignment="viewStart" />
         </LinearLayout>
 
-        <!-- Age -->
+        <!-- HEIGHT -->
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/space_4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
+            android:maxWidth="315dp"
+            android:baselineAligned="false">
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxWidth="315dp">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:id="@+id/tilHeight"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                app:hintEnabled="false"
+                android:hint="@string/hint_height"
+                app:boxStrokeColor="@color/input_stroke_color"
+                app:boxBackgroundColor="@color/muted"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxBackgroundMode="outline"
+                android:layout_height="@dimen/input_and_button_height">
 
-                <TextView
-                    android:text="Age"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <EditText
-                    android:id="@+id/etAge"
-                    android:background="@drawable/edittext_red_border"
-                    android:textColor="@color/text"
-                    android:inputType="number"
-                    android:paddingStart="14dp"
-                    android:padding="10dp"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etHeight"
+                    android:hint="@string/hint_height"
+                    android:inputType="numberDecimal"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/foreground"
+                    android:textColorHint="@color/muted_foreground"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
-                    android:layout_height="58dp" />
-            </LinearLayout>
+                    android:layout_height="match_parent" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:layout_width="16dp"
+                android:layout_height="match_parent" />
+
+            <Spinner
+                android:id="@+id/spHeightUnit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="@dimen/input_and_button_height"
+                android:background="@drawable/spinner_background"
+                android:paddingStart="14dp"
+                android:paddingEnd="36dp"
+                android:gravity="center_vertical|start"
+                android:spinnerMode="dropdown"
+                android:popupBackground="@color/muted"
+                android:textAlignment="viewStart" />
         </LinearLayout>
 
-        <!-- Sex -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxWidth="315dp">
-
-                <TextView
-                    android:text="Sex"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="58dp"
-                    android:background="@drawable/edittext_red_border">
-
-                    <Spinner
-                        android:id="@+id/spSex"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:paddingStart="14dp"
-                        android:background="@android:color/transparent"
-                        android:spinnerMode="dropdown" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_centerVertical="true"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="14dp"
-                        android:src="@drawable/ic_arrow_down_red" />
-                </RelativeLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Weight -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxWidth="315dp">
-
-                <TextView
-                    android:text="Weight"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false">
-
-                    <EditText
-                        android:id="@+id/etWeight"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/edittext_red_border"
-                        android:inputType="numberDecimal"
-                        android:textColor="@color/text"
-                        android:paddingStart="14dp"
-                        android:padding="10dp"
-                        android:layout_height="58dp" />
-
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="match_parent" />
-
-                    <RelativeLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="58dp"
-                        android:background="@drawable/edittext_red_border">
-
-                        <Spinner
-                            android:id="@+id/spWeightUnit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:paddingStart="14dp"
-                            android:background="@android:color/transparent"
-                            android:spinnerMode="dropdown" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_centerVertical="true"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginEnd="14dp"
-                            android:src="@drawable/ic_arrow_down_red" />
-                    </RelativeLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Height -->
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:maxWidth="315dp">
-
-                <TextView
-                    android:text="Height"
-                    android:textColor="@android:color/white"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="14dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:baselineAligned="false"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <EditText
-                        android:id="@+id/etHeight"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/edittext_red_border"
-                        android:inputType="numberDecimal"
-                        android:textColor="@color/text"
-                        android:paddingStart="14dp"
-                        android:padding="10dp"
-                        android:layout_height="58dp" />
-
-                    <View
-                        android:layout_width="16dp"
-                        android:layout_height="match_parent" />
-
-                    <RelativeLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="58dp"
-                        android:background="@drawable/edittext_red_border">
-
-                        <Spinner
-                            android:id="@+id/spHeightUnit"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:paddingStart="14dp"
-                            android:background="@android:color/transparent"
-                            android:spinnerMode="dropdown" />
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_centerVertical="true"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginEnd="14dp"
-                            android:src="@drawable/ic_arrow_down_red" />
-                    </RelativeLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Botão -->
+        <!-- BOTÃO -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGo"
             android:text="Good to Go"
-            android:backgroundTint="@color/secondary"
-            android:textColor="@color/text"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/primary_foreground"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/space_8"
+            android:layout_marginTop="@dimen/space_6"
             android:layout_width="match_parent"
-            android:layout_height="62dp"
+            android:layout_height="@dimen/input_and_button_height"
             android:maxWidth="315dp"
             app:cornerRadius="10dp" />
     </LinearLayout>

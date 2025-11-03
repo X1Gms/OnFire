@@ -1,11 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Theme.OnFire" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/primary</item>
-        <item name="android:navigationBarColor">@color/primary</item>
-        <item name="colorPrimary">@color/secondary</item>
-        <item name="colorOnPrimary">@color/text</item>
-        <item name="colorSurface">@color/primary</item>
-        <item name="colorOnSurface">@color/text</item>
-        <item name="android:textColor">@color/text</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColor">@color/foreground</item>
+
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/destructive</item>
+        <item name="colorOnPrimary">@color/primary_foreground</item>
+
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
     </style>
+
+    <style name="Theme.OnFire.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.OnFire.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.OnFire.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

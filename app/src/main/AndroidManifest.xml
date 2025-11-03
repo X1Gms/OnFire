@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.onfire_project" >
+    package="com.example.onfire_project">
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_onfire_logo"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_onfire_logo"
-        android:theme="@style/Theme.OnFire" >
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/Theme.OnFire">
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OnFire.NoActionBar" />
         <activity
             android:name=".RequestPermissionsActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".AddInfoActivity"
             android:exported="false" />
@@ -30,7 +29,13 @@
             android:exported="false" />
         <activity
             android:name=".HiActivity"
-            android:exported="false" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

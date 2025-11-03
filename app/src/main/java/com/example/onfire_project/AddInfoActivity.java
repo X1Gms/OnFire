@@ -1,5 +1,6 @@
 package com.example.onfire_project;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -119,6 +120,8 @@ public class AddInfoActivity extends AppCompatActivity {
                     "Saved Successfully!",
                     Toast.LENGTH_LONG
             ).show();
+
+            startActivity(new Intent(this, DashboardActivity.class));
         });
     }
 
