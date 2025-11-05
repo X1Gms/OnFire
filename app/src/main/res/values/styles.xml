@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Estilo para o input de cada dígito -->
-    <style name="CodeInputBox">
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">56dp</item>
-        <item name="android:layout_margin">6dp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:background">@drawable/bg_code_box</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:textSize">20sp</item>
-        <item name="android:inputType">number</item>
-        <item name="android:maxLength">1</item>
+    <!-- Estilo do icon hamburguer do drawer -->
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/primary</item>
+    </style>
+
+    <!-- Estilo dos cards -->
+    <style name="Widget.OnFire.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/card</item>
+        <item name="cardCornerRadius">14dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="strokeColor">@color/border</item>
+        <item name="strokeWidth">2dp</item>
     </style>
 </resources>

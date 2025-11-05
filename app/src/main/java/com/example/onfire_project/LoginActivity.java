@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(this, "Welcome " + (user != null ? user.getEmail() : ""), Toast.LENGTH_SHORT).show();
 
                             // startActivity(new Intent(this, DashboardActivity.class));
-                            startActivity(new Intent(this, AddInfoActivity.class));
+                            startActivity(new Intent(this, DashboardActivity.class));
                             finish();
                         } else {
                             Toast.makeText(this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();

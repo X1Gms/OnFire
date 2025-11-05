@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_dashboard">
+
+    <fragment
+        android:id="@+id/nav_dashboard"
+        android:name="com.example.onfire_project.ui.dashboard.DashboardFragment"
+        android:label="@string/menu_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/nav_start_exercise"
+        android:name="com.example.onfire_project.ui.startexercise.StartExerciseFragment"
+        android:label="@string/menu_start_exercise"
+        tools:layout="@layout/fragment_start_exercise" />
+
+    <fragment
+        android:id="@+id/nav_history"
+        android:name="com.example.onfire_project.ui.history.HistoryFragment"
+        android:label="@string/menu_history"
+        tools:layout="@layout/fragment_history" />
+
+    <fragment
+        android:id="@+id/nav_profile_and_settings"
+        android:name="com.example.onfire_project.ui.profileandsettings.ProfileAndSettingsFragment"
+        android:label="@string/menu_profile_and_settings"
+        tools:layout="@layout/fragment_profile_and_settings" />
+</navigation>
