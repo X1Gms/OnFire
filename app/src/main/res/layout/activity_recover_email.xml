@@ -1,6 +1,6 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/primary"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
@@ -48,55 +48,42 @@
         <!-- Campo Email -->
         <LinearLayout
             android:orientation="vertical"
-            android:layout_marginTop="@dimen/space_6"
+            android:layout_marginTop="@dimen/space_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal">
 
-            <LinearLayout
-                android:orientation="vertical"
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:id="@+id/tilEmail"
+                app:hintEnabled="false"
+                app:startIconDrawable="@drawable/ic_mail"
+                app:startIconTint="@color/primary"
+                app:boxStrokeColor="@color/input_stroke_color"
+                app:boxBackgroundColor="@color/muted"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:boxBackgroundMode="outline"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/input_and_button_height"
+                android:layout_marginTop="@dimen/space_6"
                 android:maxWidth="315dp">
 
-                <TextView
-                    android:text="Email"
-                    android:textSize="15sp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingStart="10dp"
-
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:id="@+id/tilEmail"
-                    android:hint="Insert your Email"
-                    app:startIconDrawable="@drawable/ic_email"
-                    app:startIconTint="@color/primary"
-                    app:hintTextColor="@color/foreground"
-                    app:boxStrokeColor="@color/primary"
-                    app:boxStrokeWidth="2dp"
-                    app:boxStrokeWidthFocused="3dp"
-                    app:boxCornerRadiusTopStart="14dp"
-                    app:boxCornerRadiusTopEnd="14dp"
-                    app:boxCornerRadiusBottomStart="14dp"
-                    app:boxCornerRadiusBottomEnd="14dp"
-                    app:boxBackgroundMode="outline"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    android:hint="@string/email"
+                    android:inputType="textEmailAddress"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/foreground"
+                    android:textColorHint="@color/muted_foreground"
+                    android:paddingStart="8dp"
                     android:layout_width="match_parent"
-                    android:layout_height="58dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etEmail"
-                        android:inputType="textEmailAddress"
-                        android:textColor="@color/foreground"
-                        android:textColorHint="@color/muted_foreground"
-                        android:paddingStart="8dp"
-                        android:paddingLeft="8dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
+                    android:layout_height="match_parent" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <!-- Botão Send -->

@@ -1,8 +1,10 @@
 package com.example.onfire_project;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -11,9 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
 
+import java.util.Calendar;
+
 public class AddInfoActivity extends AppCompatActivity {
 
-    private EditText etFullName, etAge, etWeight, etHeight;
+    private EditText etFullName, etBirthDate, etWeight, etHeight;
     private Spinner spSex, spWeightUnit, spHeightUnit;
     private MaterialButton btnGo;
 
@@ -23,19 +27,40 @@ public class AddInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_info);
 
         initViews();
+        setUpDateInput();
         setupSpinners();
         setupListeners();
     }
 
     private void initViews() {
         etFullName = findViewById(R.id.etFullName);
-        etAge = findViewById(R.id.etAge);
+        etBirthDate = findViewById(R.id.etAge);
         spSex = findViewById(R.id.spSex);
         spWeightUnit = findViewById(R.id.spWeightUnit);
         spHeightUnit = findViewById(R.id.spHeightUnit);
         etWeight = findViewById(R.id.etWeight);
         etHeight = findViewById(R.id.etHeight);
         btnGo = findViewById(R.id.btnGo);
+    }
+
+    private void setUpDateInput(){
+        Calendar calendar = Calendar.getInstance();
+
+        etBirthDate.setOnClickListener(v -> {
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this,
+                    (DatePicker view, int selectedYear, int selectedMonth, int selectedDay) -> {
+                        String date = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                        etBirthDate.setText(date);
+                    },
+                    year, month, day);
+
+            datePickerDialog.show();
+        });
     }
 
     private void setupSpinners() {
@@ -67,7 +92,7 @@ public class AddInfoActivity extends AppCompatActivity {
     private void setupListeners() {
         btnGo.setOnClickListener(v -> {
             String name = etFullName.getText().toString().trim();
-            String ageStr = etAge.getText().toString().trim();
+            String ageStr = etBirthDate.getText().toString().trim();
             String sex = (String) spSex.getSelectedItem();
             String wu = (String) spWeightUnit.getSelectedItem();
             String hu = (String) spHeightUnit.getSelectedItem();
@@ -121,7 +146,7 @@ public class AddInfoActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG
             ).show();
 
-            startActivity(new Intent(this, DashboardActivity.class));
+            startActivity(new Intent(this, RequestPermissionsActivity.class));
         });
     }
 

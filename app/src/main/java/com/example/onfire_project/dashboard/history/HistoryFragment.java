@@ -1,4 +1,4 @@
-package com.example.onfire_project.ui.dashboard;
+package com.example.onfire_project.dashboard.history;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,20 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.onfire_project.databinding.FragmentDashboardBinding;
+import com.example.onfire_project.databinding.FragmentHistoryBinding;
 
-public class DashboardFragment extends Fragment {
+public class HistoryFragment extends Fragment {
 
-    private FragmentDashboardBinding binding;
+    private FragmentHistoryBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DashboardViewModel homeViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+        HistoryViewModel slideshowViewModel =
+                new ViewModelProvider(this).get(HistoryViewModel.class);
 
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentHistoryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        final TextView textView = binding.textSlideshow;
+        slideshowViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

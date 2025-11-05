@@ -1,4 +1,4 @@
-package com.example.onfire_project.ui.dashboard;
+package com.example.onfire_project.dashboard.dashboard;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
