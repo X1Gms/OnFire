@@ -1,16 +1,16 @@
-package com.example.onfire_project.ui.profileandsettings;
+package com.example.onfire_project.dashboard.history;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ProfileAndSettingsViewModel extends ViewModel {
+public class HistoryViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public ProfileAndSettingsViewModel() {
+    public HistoryViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is profile and settings fragment");
+        mText.setValue("This is history fragment");
     }
 
     public LiveData<String> getText() {

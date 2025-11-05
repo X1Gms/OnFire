@@ -7,7 +7,7 @@
 
     <!-- Arco superior -->
     <path
-        android:strokeColor="#C7452A"
+        android:strokeColor="@color/primary"
         android:strokeWidth="2"
         android:fillColor="@android:color/transparent"
         android:strokeLineJoin="round"
@@ -16,7 +16,7 @@
 
     <!-- Corpo quadrado -->
     <path
-        android:strokeColor="#C7452A"
+        android:strokeColor="@color/primary"
         android:strokeWidth="2"
         android:fillColor="@android:color/transparent"
         android:strokeLineJoin="round"
@@ -25,6 +25,6 @@
 
     <!-- Bolinha  -->
     <path
-        android:fillColor="#C7452A"
+        android:fillColor="@color/primary"
         android:pathData="M12,17a1.5,1.5 0,1 0,0.001,-3.001A1.5,1.5 0,0 0,12,17z" />
 </vector>

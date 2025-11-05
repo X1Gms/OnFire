@@ -1,4 +1,4 @@
-package com.example.onfire_project.ui.profileandsettings;
+package com.example.onfire_project.dashboard.profileandsettings;
 
 import androidx.lifecycle.ViewModelProvider;
 

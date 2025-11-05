@@ -46,13 +46,11 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(this, "Welcome " + (user != null ? user.getEmail() : ""), Toast.LENGTH_SHORT).show();
-
-                            // startActivity(new Intent(this, DashboardActivity.class));
-                            startActivity(new Intent(this, DashboardActivity.class));
+//                            Toast.makeText(this, "Welcome " + (user != null ? user.getEmail() : ""), Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, RequestPermissionsActivity.class));
                             finish();
                         } else {
-                            Toast.makeText(this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "E-mail or password incorrect", Toast.LENGTH_LONG).show();
                         }
                     });
         });

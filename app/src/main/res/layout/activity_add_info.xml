@@ -58,7 +58,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:id="@+id/tilAge"
             android:layout_marginTop="@dimen/space_4"
-            android:hint="@string/hint_age"
+            android:hint="@string/hint_birth_date"
             app:hintEnabled="false"
             app:boxStrokeColor="@color/input_stroke_color"
             app:boxBackgroundColor="@color/muted"
@@ -75,7 +75,7 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etAge"
-                android:hint="@string/hint_age"
+                android:hint="@string/hint_birth_date"
                 android:inputType="number"
                 android:includeFontPadding="false"
                 android:textColor="@color/foreground"

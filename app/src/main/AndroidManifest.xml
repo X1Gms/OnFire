@@ -2,6 +2,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.onfire_project">
 
+    <!-- INTERNET é necessário para osmdroid (download de tiles) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Estado da rede (útil para decidir se usar tiles em cache / network) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- 📍 Localização (foreground e background) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- 👣 Reconhecimento de atividade / passos (runtime em Android 10+) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <!-- 🕒 Serviço em primeiro plano (para tracking contínuo) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- 💾 Ler / Escrever ficheiros (o teu pedido = leitura/escrita) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- 🔔 Notificações: necessário solicitar em runtime no Android 13+ (targetSdk >= 33) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 🔋 Wake lock: útil se usares foreground service para garantir CPU ativo durante tracking -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -13,10 +39,13 @@
             android:exported="false"
             android:theme="@style/Theme.OnFire.NoActionBar" />
         <activity
-            android:name=".RequestPermissionsActivity"
-            android:exported="true" />
-        <activity
             android:name=".AddInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RequestPermissionsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RunningActivity"
             android:exported="false" />
         <activity
             android:name=".RecoverEmailActivity"
