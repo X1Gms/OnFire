@@ -60,13 +60,13 @@ public class RequestPermissionsActivity extends AppCompatActivity {
             }
         }
 
-        // Storage
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-            return false;
-        }
+//        // Storage
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED ||
+//                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                        != PackageManager.PERMISSION_GRANTED) {
+//            return false;
+//        }
 
         // Location
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -95,26 +95,27 @@ public class RequestPermissionsActivity extends AppCompatActivity {
                     }
                 }
                 // Já tem ou não precisa → próximo estágio
-                currentStage = STAGE_STORAGE;
-                requestNextMissingPermission();
-                break;
-
-            case STAGE_STORAGE:
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED ||
-                        ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                            },
-                            REQ_STORAGE);
-                    return;
-                }
+//                currentStage = STAGE_STORAGE;
                 currentStage = STAGE_LOCATION;
                 requestNextMissingPermission();
                 break;
+
+//            case STAGE_STORAGE:
+//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+//                        != PackageManager.PERMISSION_GRANTED ||
+//                        ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                                != PackageManager.PERMISSION_GRANTED) {
+//                    ActivityCompat.requestPermissions(this,
+//                            new String[]{
+//                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                            },
+//                            REQ_STORAGE);
+//                    return;
+//                }
+//                currentStage = STAGE_LOCATION;
+//                requestNextMissingPermission();
+//                break;
 
             case STAGE_LOCATION:
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -175,28 +176,29 @@ public class RequestPermissionsActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQ_ACTIVITY:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    currentStage = STAGE_STORAGE;
+                    //currentStage = STAGE_STORAGE;
+                    currentStage = STAGE_LOCATION;
                 } else {
                     Toast.makeText(this, "Permissão de reconhecimento de atividade é obrigatória", Toast.LENGTH_LONG).show();
                     return;
                 }
                 break;
 
-            case REQ_STORAGE:
-                boolean storageGranted = true;
-                for (int result : grantResults) {
-                    if (result != PackageManager.PERMISSION_GRANTED) {
-                        storageGranted = false;
-                        break;
-                    }
-                }
-                if (storageGranted) {
-                    currentStage = STAGE_LOCATION;
-                } else {
-                    Toast.makeText(this, "Permissões de armazenamento são obrigatórias", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                break;
+//            case REQ_STORAGE:
+//                boolean storageGranted = true;
+//                for (int result : grantResults) {
+//                    if (result != PackageManager.PERMISSION_GRANTED) {
+//                        storageGranted = false;
+//                        break;
+//                    }
+//                }
+//                if (storageGranted) {
+//                    currentStage = STAGE_LOCATION;
+//                } else {
+//                    Toast.makeText(this, "Permissões de armazenamento são obrigatórias", Toast.LENGTH_LONG).show();
+//                    return;
+//                }
+//                break;
 
             case REQ_LOCATION:
                 boolean locationGranted = true;

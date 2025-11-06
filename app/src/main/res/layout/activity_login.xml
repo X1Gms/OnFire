@@ -4,12 +4,18 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
+    <!-- FrameLayout para sobrepor o ProgressBar -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:orientation="vertical"
         android:padding="28sp"
         android:gravity="center_horizontal|start"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout">
 
         <!-- LOGO -->
         <ImageView
@@ -182,4 +188,14 @@
         </LinearLayout>
 
     </LinearLayout>
+        <!-- ProgressBar circular no centro -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateTint="@color/primary" />
+
+    </FrameLayout>
 </ScrollView>

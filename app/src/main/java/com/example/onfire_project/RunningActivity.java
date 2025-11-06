@@ -37,6 +37,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.util.Locale;
 
 public class RunningActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -55,6 +56,8 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     private Location latestLocation;
 
     private LinearLayout cancelBtn;
+    private LinearLayout modeBtn;
+    private ImageView modeIcon;
 
     private double totalDistanceMeters = 0.0;
 
@@ -66,9 +69,13 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
 
     // UI
     private TextView statusGPS;
-    private TextView timeTxt;
-    private TextView paceTxt;
-    private TextView kilTxt;
+    private TextView txtMode;
+    private TextView tvResult01;
+    private TextView tvResult02;
+    private TextView tvResult03;
+    private TextView tvLabel01;
+    private TextView tvLabel02;
+    private TextView tvLabel03;
     private LinearLayout toggleActivity;
     private ImageView toggleIcon;
     private LinearLayout statusGpsContainer;
@@ -94,6 +101,27 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     // GPS status (apenas para UI)
     private boolean gpsObtained = false;
 
+    // Enum para os modos de atividade
+    private enum ActivityMode {
+        RUNNING(R.drawable.ic_running, "Running", "Time", "Pace", "Kilometers"),
+        CYCLING(R.drawable.ic_cycling, "Cycling", "Time", "Speed", "Kilometers"),
+        WALKING(R.drawable.ic_walking, "Walking", "Time", "Kilometers", "Calories");
+
+        final int iconRes;
+        final String displayName;
+        final String label1, label2, label3;
+
+        ActivityMode(int iconRes, String displayName, String label1, String label2, String label3) {
+            this.iconRes = iconRes;
+            this.displayName = displayName;
+            this.label1 = label1;
+            this.label2 = label2;
+            this.label3 = label3;
+        }
+    }
+
+    private ActivityMode currentMode = ActivityMode.RUNNING;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,8 +138,8 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         initializeTimer();
         setupClickListeners();
 
-        // UI inicial
-        updateInitialUI();
+        // UI inicial - atualizar conforme o modo
+        updateUIForCurrentMode();
     }
 
     private void initializeViews() {
@@ -121,13 +149,24 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         // UI elements
         statusGpsContainer = findViewById(R.id.linearLayout);
         statusGPS = findViewById(R.id.statusGPS);
-        timeTxt = findViewById(R.id.timeTxt);
-        paceTxt = findViewById(R.id.paceTxt);
-        kilTxt = findViewById(R.id.kilTxt);
+        tvResult01 = findViewById(R.id.tvResult01);
+        tvResult02 = findViewById(R.id.tvResult02);
+        tvResult03 = findViewById(R.id.tvResult03);
+
+        // Inicializar os labels
+        tvLabel01 = findViewById(R.id.tvLabel01);
+        tvLabel02 = findViewById(R.id.tvLabel02);
+        tvLabel03 = findViewById(R.id.txLabel03); // Note: no XML é txLabel03, não tvLabel03
+
         toggleActivity = findViewById(R.id.toggleActivity);
         toggleIcon = findViewById(R.id.imageView10);
         stopBtn = findViewById(R.id.stopActivity);
         cancelBtn = findViewById(R.id.cancelActivity);
+        txtMode = findViewById(R.id.txtMode);
+
+        // Inicializar botão de modo
+        modeBtn = findViewById(R.id.modeActivity);
+        modeIcon = findViewById(R.id.imageView9); // ID do ImageView no modeActivity
 
         OnBackPressedCallback callback =
                 new OnBackPressedCallback(true) {
@@ -195,33 +234,21 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
                     elapsed = 0L;
                 }
 
-                // Atualiza tempo
+                // Atualiza tempo (comum a todos os modos)
                 long totalSeconds = elapsed / 1000;
                 long minutes = totalSeconds / 60;
                 long seconds = totalSeconds % 60;
-                if (timeTxt != null) timeTxt.setText(String.format("%02d:%02d", minutes, seconds));
+                if (tvResult01 != null) tvResult01.setText(String.format("%02d:%02d", minutes, seconds));
 
                 // Calcula distância baseada em passos
                 totalDistanceMeters = stepsSinceStart * AVERAGE_STRIDE_LENGTH_METERS;
                 stepsStored = stepsSinceStart;
                 caloriesStored = stepsSinceStart * CALORIES_PER_STEP;
 
-                // Pace (min/km)
-                if (sessionStarted && totalDistanceMeters >= 1.0 && elapsed > 0) {
-                    double timeSecs = elapsed / 1000.0;
-                    double paceSecPerKm = timeSecs / (totalDistanceMeters / 1000.0);
-                    int paceMin = (int) (paceSecPerKm / 60.0);
-                    int paceSec = (int) (paceSecPerKm % 60.0);
-                    if (paceTxt != null) paceTxt.setText(String.format("%d:%02d", paceMin, paceSec));
-                } else {
-                    if (paceTxt != null) paceTxt.setText("--:--");
-                }
+                // Atualiza UI conforme o modo atual
+                updateResultsForCurrentMode(elapsed);
 
-                // Distância em km
-                double km = totalDistanceMeters / 1000.0;
-                if (kilTxt != null) kilTxt.setText(String.format("%.2f km", km));
-
-                // Velocidade média (km/h)
+                // Velocidade média (km/h) - cálculo comum
                 if (sessionStarted && elapsed > 0) {
                     double speedKmh = (totalDistanceMeters / (elapsed / 1000.0)) * 3.6;
                     speedKmhStored = speedKmh;
@@ -253,6 +280,132 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         // Cancel button
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(v -> showCancelConfirmationDialog());
+        }
+
+        // Mode button - alternar entre modos
+        if (modeBtn != null) {
+            modeBtn.setOnClickListener(v -> switchActivityMode());
+        }
+    }
+
+    /**
+     * Método para alternar entre os modos de atividade
+     */
+    private void switchActivityMode() {
+        // Ciclo: Running -> Cycling -> Walking -> Running
+        switch (currentMode) {
+            case RUNNING:
+                currentMode = ActivityMode.CYCLING;
+                break;
+            case CYCLING:
+                currentMode = ActivityMode.WALKING;
+                break;
+            case WALKING:
+                currentMode = ActivityMode.RUNNING;
+                break;
+        }
+
+        updateUIForCurrentMode();
+    }
+
+    /**
+     * Atualiza a UI conforme o modo atual
+     */
+    private void updateUIForCurrentMode() {
+        // Atualizar texto do modo
+        if (txtMode != null) {
+            txtMode.setText(currentMode.displayName);
+        }
+
+        // Atualizar ícone do modo
+        if (modeIcon != null) {
+            modeIcon.setImageResource(currentMode.iconRes);
+        }
+
+        // Atualizar labels
+        if (tvLabel01 != null) tvLabel01.setText(currentMode.label1);
+        if (tvLabel02 != null) tvLabel02.setText(currentMode.label2);
+        if (tvLabel03 != null) tvLabel03.setText(currentMode.label3);
+
+        // Atualizar valores iniciais
+        updateInitialUI();
+    }
+
+    /**
+     * Atualiza os resultados conforme o modo atual
+     */
+    private void updateResultsForCurrentMode(long elapsed) {
+        double km = totalDistanceMeters / 1000.0;
+        int calories = (int) Math.round(caloriesStored);
+
+        switch (currentMode) {
+            case RUNNING:
+                updateRunningMode(elapsed, km);
+                break;
+            case CYCLING:
+                updateCyclingMode(elapsed, km);
+                break;
+            case WALKING:
+                updateWalkingMode(km, calories);
+                break;
+        }
+    }
+
+    private void updateRunningMode(long elapsed, double km) {
+        // Pace (min/km)
+        if (sessionStarted && totalDistanceMeters >= 1.0 && elapsed > 0) {
+            double timeSecs = elapsed / 1000.0;
+            double paceSecPerKm = timeSecs / (totalDistanceMeters / 1000.0);
+            int paceMin = (int) (paceSecPerKm / 60.0);
+            int paceSec = (int) (paceSecPerKm % 60.0);
+            if (tvResult02 != null) tvResult02.setText(String.format("%d:%02d", paceMin, paceSec));
+        } else {
+            if (tvResult02 != null) tvResult02.setText("--:--");
+        }
+
+        // Distância em km
+        if (tvResult03 != null) tvResult03.setText(String.format("%.2f", km));
+    }
+
+    private void updateCyclingMode(long elapsed, double km) {
+        // Velocidade (km/h)
+        if (sessionStarted && elapsed > 0) {
+            double speedKmh = (totalDistanceMeters / (elapsed / 1000.0)) * 3.6;
+            if (tvResult02 != null) tvResult02.setText(String.format("%.2f", speedKmh));
+        } else {
+            if (tvResult02 != null) tvResult02.setText("0.00");
+        }
+
+        // Distância em km
+        if (tvResult03 != null) tvResult03.setText(String.format("%.2f", km));
+    }
+
+    private void updateWalkingMode(double km, int calories) {
+        // Distância em km
+        if (tvResult02 != null) tvResult02.setText(String.format("%.2f", km));
+
+        // Calorias
+        if (tvResult03 != null) tvResult03.setText(String.format("%d", calories));
+    }
+
+    private void updateInitialUI() {
+        if (statusGPS != null) statusGPS.setText("Getting GPS Location");
+        if (tvResult01 != null) tvResult01.setText("00:00");
+
+        // Inicializar conforme o modo
+        switch (currentMode) {
+            case RUNNING:
+                if (tvResult02 != null) tvResult02.setText("--:--");
+                if (tvResult03 != null) tvResult03.setText("0.00");
+                break;
+            case CYCLING:
+                if (tvResult02 != null) tvResult02.setText("0.00");
+                if (tvResult03 != null) tvResult03.setText("0.00");
+                break;
+            case WALKING:
+                if (tvResult02 != null) tvResult02.setText("0.00");
+                if (tvResult03 != null) tvResult03.setText("0");
+                break;
         }
     }
 
@@ -292,18 +445,24 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     private void saveActivityData() {
         // Parar a sessão primeiro para gerar o JSON
         if (sessionStarted) {
-
             String json = stopSession();
-
+            saveToDatabase(json);
             Log.d("RunningActivity", "Activity data saved: " + json);
         }
     }
 
-    private void updateInitialUI() {
-        if (statusGPS != null) statusGPS.setText("Getting GPS Location");
-        if (timeTxt != null) timeTxt.setText("00:00");
-        if (paceTxt != null) paceTxt.setText("--:--");
-        if (kilTxt != null) kilTxt.setText("0.00 km");
+    private void updateGpsStatus(boolean obtained) {
+        gpsObtained = obtained;
+        if (statusGPS != null) {
+            statusGPS.setText(obtained ? "GPS location obtained" : "Getting GPS Location");
+        }
+        if (obtained) {
+            try {
+                if (statusGpsContainer != null)
+                    ViewCompat.setBackgroundTintList(statusGpsContainer,
+                            ContextCompat.getColorStateList(this, R.color.success));
+            } catch (Exception ignored) {}
+        }
     }
 
     private boolean hasLocationPermissions() {
@@ -397,7 +556,10 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         int calories = (int) Math.round(caloriesStored);
         double avgSpeed = speedKmhStored;
 
+        // Gerar dados específicos por modo
         String pace = "--:--";
+        String speed = String.format("%.2f", avgSpeed);
+
         if (totalDistanceMeters >= 1.0 && totalElapsedMs > 0) {
             double timeSecs = totalElapsedMs / 1000.0;
             double paceSecPerKm = timeSecs / distanceKm;
@@ -407,8 +569,9 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         }
 
         String json = "{\n" +
-                "  \"type\": \"running\",\n" +
+                "  \"type\": \"" + currentMode.displayName.toLowerCase() + "\",\n" +
                 "  \"pace\": \"" + pace + "\",\n" +
+                "  \"speed\": \"" + speed + "\",\n" +
                 "  \"distance\": " + String.format("%.2f", distanceKm) + ",\n" +
                 "  \"calories\": " + calories + ",\n" +
                 "  \"avg_speed\": " + String.format("%.2f", avgSpeed) + ",\n" +
@@ -430,9 +593,8 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         caloriesStored = 0.0;
         speedKmhStored = 0.0;
 
-        if (timeTxt != null) timeTxt.setText("00:00");
-        if (paceTxt != null) paceTxt.setText("--:--");
-        if (kilTxt != null) kilTxt.setText("0.00 km");
+        // Atualizar UI para valores iniciais
+        updateInitialUI();
 
         try {
             if (toggleIcon != null) toggleIcon.setImageResource(R.drawable.ic_play);
@@ -447,6 +609,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
 
     private void saveToDatabase(String jsonData) {
         Log.i("Database", "Saving to database: " + jsonData);
+        // TODO: Implementar o envio para a base de dados
     }
 
     private void returnToDashboard() {
@@ -455,6 +618,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         startActivity(intent);
         finish();
     }
+
     private void startLocationUpdates() {
         if (!hasLocationPermissions()) return;
 
@@ -494,20 +658,6 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private void updateGpsStatus(boolean obtained) {
-        gpsObtained = obtained;
-        if (statusGPS != null) {
-            statusGPS.setText(obtained ? "GPS location obtained" : "Getting GPS Location");
-        }
-        if (obtained) {
-            try {
-                if (statusGpsContainer != null)
-                    ViewCompat.setBackgroundTintList(statusGpsContainer,
-                            ContextCompat.getColorStateList(this, R.color.success));
-            } catch (Exception ignored) {}
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.onfire_project;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,6 +9,8 @@ import android.widget.Toast;
 
 import com.example.onfire_project.databinding.ActivityDashboardBinding;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
@@ -24,6 +27,9 @@ public class DashboardActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private NavController navController;
     private MenuItem lastSelectedMenuItem;
+    private static final String KEY_EMAIL = "saved_email";
+    private static final String KEY_PASSWORD = "saved_password";
+    private static final String KEY_AUTO_LOGIN_ENABLED = "auto_login_enabled";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,8 +124,26 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void handleSignOut() {
-        Toast.makeText(this, getString(R.string.sign_out_message), Toast.LENGTH_SHORT).show();
-        // Implementação do sign out
+        // 1. Fazer sign out do Firebase Auth
+        FirebaseAuth.getInstance().signOut();
+
+        // 2. Desativar o login automático nas SharedPreferences
+        SharedPreferences loginPrefs = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        disableAutoLogin(loginPrefs);
+
+        // 3. Redirecionar para a LoginActivity e limpar a back stack
+        Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    public static void disableAutoLogin(SharedPreferences preferences) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(KEY_EMAIL);
+        editor.remove(KEY_PASSWORD);
+        editor.putBoolean(KEY_AUTO_LOGIN_ENABLED, false);
+        editor.apply();
     }
 
     @Override

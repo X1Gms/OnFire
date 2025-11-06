@@ -1,8 +1,12 @@
 package com.example.onfire_project;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +19,15 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    private ProgressBar progressBar;
+    private LinearLayout linearLayout;
+    private SharedPreferences sharedPreferences;
+
+    // Chaves para SharedPreferences
+    private static final String LOGIN_PREFS = "LoginPrefs";
+    private static final String KEY_EMAIL = "saved_email";
+    private static final String KEY_PASSWORD = "saved_password";
+    private static final String KEY_AUTO_LOGIN_ENABLED = "auto_login_enabled";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,12 +35,18 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        sharedPreferences = getSharedPreferences(LOGIN_PREFS, MODE_PRIVATE);
 
+        progressBar = findViewById(R.id.progressBar);
+        linearLayout = findViewById(R.id.linearLayout);
         EditText etEmail = findViewById(R.id.etEmail);
         EditText etPassword = findViewById(R.id.etPassword);
         MaterialButton btnLogin = findViewById(R.id.btnLogin);
         TextView tvForgot = findViewById(R.id.tvForgot);
         TextView tvRegister = findViewById(R.id.tvRegister);
+
+        // Verifica se deve tentar login automático
+        checkAutoLogin();
 
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -42,20 +61,111 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            mAuth.signInWithEmailAndPassword(email, pass)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-//                            Toast.makeText(this, "Welcome " + (user != null ? user.getEmail() : ""), Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, RequestPermissionsActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(this, "E-mail or password incorrect", Toast.LENGTH_LONG).show();
-                        }
-                    });
+            performLogin(email, pass, true); // true = salvar credenciais
         });
 
         tvForgot.setOnClickListener(v -> startActivity(new Intent(this, RecoverEmailActivity.class)));
         tvRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
+    }
+
+    private void checkAutoLogin() {
+        String savedEmail = sharedPreferences.getString(KEY_EMAIL, null);
+        String savedPassword = sharedPreferences.getString(KEY_PASSWORD, null);
+        boolean autoLoginEnabled = sharedPreferences.getBoolean(KEY_AUTO_LOGIN_ENABLED, true);
+
+        if (savedEmail != null && savedPassword != null && autoLoginEnabled) {
+            // Tem credenciais salvas → esconde o layout e faz login automático
+            showLoginUI(false);
+            progressBar.setVisibility(View.VISIBLE);
+
+            // Preenche os campos (caso o login automático falhe)
+            EditText etEmail = findViewById(R.id.etEmail);
+            EditText etPassword = findViewById(R.id.etPassword);
+            etEmail.setText(savedEmail);
+            etPassword.setText(savedPassword);
+
+            performLogin(savedEmail, savedPassword, false); // false = não salvar novamente
+        } else {
+            // Não tem credenciais salvas → mostra o layout normal
+            showLoginUI(true);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void performLogin(String email, String password, boolean saveCredentials) {
+        showLoading(true);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+
+                        if (saveCredentials) {
+                            // Salva as credenciais para login automático futuro
+                            saveLoginCredentials(email, password);
+                        }
+
+                        // Login bem-sucedido
+                        startActivity(new Intent(this, RequestPermissionsActivity.class));
+                        finish();
+                    } else {
+                        // Login falhou - mostra a UI de login
+                        showLoginUI(true);
+                        showLoading(false);
+
+                        if (saveCredentials) {
+                            // Remove credenciais salvas se o login falhar
+                            clearSavedCredentials();
+                        }
+
+                        Toast.makeText(this, "E-mail or password incorrect", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void saveLoginCredentials(String email, String password) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_EMAIL, email);
+        editor.putString(KEY_PASSWORD, password);
+        editor.putBoolean(KEY_AUTO_LOGIN_ENABLED, true);
+        editor.apply();
+    }
+
+    private void clearSavedCredentials() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KEY_EMAIL);
+        editor.remove(KEY_PASSWORD);
+        editor.apply();
+    }
+
+    private void showLoginUI(boolean show) {
+        if (linearLayout != null) {
+            linearLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void showLoading(boolean show) {
+        MaterialButton btnLogin = findViewById(R.id.btnLogin);
+        TextView tvForgot = findViewById(R.id.tvForgot);
+        TextView tvRegister = findViewById(R.id.tvRegister);
+
+        if (show) {
+            progressBar.setVisibility(View.VISIBLE);
+            btnLogin.setEnabled(false);
+            tvForgot.setEnabled(false);
+            tvRegister.setEnabled(false);
+            btnLogin.setAlpha(0.5f);
+            // Mantém o linearLayout visível durante o loading manual
+            if (linearLayout.getVisibility() == View.VISIBLE) {
+                linearLayout.setAlpha(0.7f);
+            }
+        } else {
+            progressBar.setVisibility(View.GONE);
+            btnLogin.setEnabled(true);
+            tvForgot.setEnabled(true);
+            tvRegister.setEnabled(true);
+            btnLogin.setAlpha(1f);
+            linearLayout.setAlpha(1f);
+        }
     }
 }
