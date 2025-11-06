@@ -20,8 +20,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- 💾 Ler / Escrever ficheiros (o teu pedido = leitura/escrita) -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
+<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />-->
 
     <!-- 🔔 Notificações: necessário solicitar em runtime no Android 13+ (targetSdk >= 33) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

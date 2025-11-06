@@ -75,7 +75,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/timeTxt"
+            android:id="@+id/tvResult01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
@@ -88,7 +88,7 @@
             map:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
         <TextView
-            android:id="@+id/textView14"
+            android:id="@+id/tvLabel01"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
@@ -96,54 +96,57 @@
             android:text="Time"
             android:textColor="@color/muted_foreground"
             map:layout_constraintStart_toStartOf="parent"
-            map:layout_constraintTop_toBottomOf="@+id/timeTxt" />
+            map:layout_constraintTop_toBottomOf="@+id/tvResult01" />
 
         <TextView
-            android:id="@+id/paceTxt"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvResult02"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="14dp"
             android:text="--:--"
-            android:textAlignment="center"
+            android:gravity="center"
             android:textSize="32sp"
             android:textStyle="bold"
-            map:layout_constraintStart_toEndOf="@+id/timeTxt"
+            map:layout_constraintStart_toEndOf="@+id/tvResult01"
             map:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
         <TextView
-            android:id="@+id/textView13"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvLabel02"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="65dp"
+            android:layout_marginStart="57dp"
             android:layout_marginTop="11dp"
-            android:text="Pace (/km)"
+            android:text="Kilometers"
+            android:gravity="center"
             android:textColor="@color/muted_foreground"
-            map:layout_constraintStart_toEndOf="@+id/textView14"
-            map:layout_constraintTop_toBottomOf="@+id/paceTxt" />
+            map:layout_constraintStart_toEndOf="@+id/tvLabel01"
+            map:layout_constraintTop_toBottomOf="@+id/tvResult02" />
 
         <TextView
-            android:id="@+id/kilTxt"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvResult03"
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="44dp"
+            android:layout_marginStart="35dp"
             android:layout_marginTop="24dp"
-            android:text="0.00 km"
+            android:text="100.00"
+            android:gravity="center"
             android:textSize="20sp"
             android:textStyle="bold"
-            map:layout_constraintStart_toEndOf="@+id/paceTxt"
+            map:layout_constraintStart_toEndOf="@+id/tvResult02"
             map:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
         <TextView
-            android:id="@+id/textView16"
-            android:layout_width="wrap_content"
+            android:id="@+id/txLabel03"
+            android:layout_width="70dp"
+            android:gravity="center"
             android:layout_height="wrap_content"
-            android:layout_marginStart="55dp"
+            android:layout_marginStart="45dp"
             android:layout_marginTop="15dp"
-            android:text="Distance"
+            android:text="Kilometers"
             android:textColor="@color/muted_foreground"
-            map:layout_constraintStart_toEndOf="@+id/textView13"
-            map:layout_constraintTop_toBottomOf="@+id/kilTxt" />
+            map:layout_constraintStart_toEndOf="@+id/tvLabel02"
+            map:layout_constraintTop_toBottomOf="@+id/tvResult03" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -190,7 +193,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textView18"
+            android:id="@+id/txtMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
