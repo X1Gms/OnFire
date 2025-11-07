@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,8 @@ import com.example.onfire_project.data.FirebaseManager;
 import com.example.onfire_project.data.models.Atividade;
 import com.example.onfire_project.data.models.Pessoa;
 import com.example.onfire_project.databinding.FragmentProfileAndSettingsBinding;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class ProfileAndSettingsFragment extends Fragment {
@@ -59,7 +64,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         setupSpinners();
         setupDatePicker();
         setupClicks();
-        setupAutoUpdate(); // optional auto-save on typing
+//        setupAutoUpdate(); // optional auto-save on typing
 
         return view;
     }
@@ -111,6 +116,7 @@ public class ProfileAndSettingsFragment extends Fragment {
 
                     // ✅ update UI fields
                     binding.etFullName.setText(p.nome);
+                    binding.etEmail.setText(p.email);
                     binding.etAge.setText(p.dataNascimento);
                     binding.etWeight.setText(String.valueOf(p.peso));
                     binding.etHeight.setText(String.valueOf(p.altura));
@@ -134,6 +140,7 @@ public class ProfileAndSettingsFragment extends Fragment {
                     if (local != null) {
                         currentUser = local;
                         binding.etFullName.setText(local.nome);
+                        binding.etEmail.setText(local.email);
                         binding.etAge.setText(local.dataNascimento);
                         binding.etWeight.setText(String.valueOf(local.peso));
                         binding.etHeight.setText(String.valueOf(local.altura));
@@ -185,15 +192,14 @@ public class ProfileAndSettingsFragment extends Fragment {
             int month = calendar.get(Calendar.MONTH);
             int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-            new DatePickerDialog(requireContext(), (datePicker, y, m, d) -> {
-                binding.etAge.setText(d + "/" + (m + 1) + "/" + y);
-            }, year, month, day).show();
+            new DatePickerDialog(requireContext(), (datePicker, y, m, d) ->
+                    binding.etAge.setText(d + "/" + (m + 1) + "/" + y), year, month, day).show();
         });
     }
 
     private void setupClicks() {
         binding.btnSaveInfo.setOnClickListener(v -> savePersonalInfo());
-        binding.btnSaveNewPassword.setOnClickListener(v -> savePassword());
+        binding.btnSaveNewPassword.setOnClickListener(v -> saveCredentials());
         binding.tvForgot.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), RecoverEmailActivity.class);
             startActivity(intent);
@@ -206,26 +212,28 @@ public class ProfileAndSettingsFragment extends Fragment {
     }
 
     // 🔹 Auto update on typing
-    private void setupAutoUpdate() {
-        TextWatcher watcher = new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) {
-                savePersonalInfo();
-            }
-        };
-        binding.etFullName.addTextChangedListener(watcher);
-        binding.etWeight.addTextChangedListener(watcher);
-        binding.etHeight.addTextChangedListener(watcher);
-    }
+//    private void setupAutoUpdate() {
+//        TextWatcher watcher = new TextWatcher() {
+//            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+//            @Override public void afterTextChanged(Editable s) {
+//                savePersonalInfo();
+//            }
+//        };
+//        binding.etFullName.addTextChangedListener(watcher);
+//        binding.etWeight.addTextChangedListener(watcher);
+//        binding.etHeight.addTextChangedListener(watcher);
+//    }
 
     // 🔹 Save info to Firebase + SQLite
     private void savePersonalInfo() {
-        String name = binding.etFullName.getText().toString().trim();
-        String birthDate = binding.etAge.getText().toString().trim();
+        String name = Objects.requireNonNull(binding.etFullName.getText()).toString().trim();
+        String birthDate = Objects.requireNonNull(binding.etAge.getText()).toString().trim();
         String sex = binding.spSex.getSelectedItem().toString();
-        String weightStr = binding.etWeight.getText().toString().trim();
-        String heightStr = binding.etHeight.getText().toString().trim();
+        String weightStr = Objects.requireNonNull(binding.etWeight.getText()).toString().trim();
+        String heightStr = Objects.requireNonNull(binding.etHeight.getText()).toString().trim();
+        String wu = (String) binding.spWeightUnit.getSelectedItem();
+        String hu = (String) binding.spHeightUnit.getSelectedItem();
 
         if (name.isEmpty()) {
             toast("Enter your full name");
@@ -257,6 +265,9 @@ public class ProfileAndSettingsFragment extends Fragment {
         double weight = Double.parseDouble(weightStr);
         double height = Double.parseDouble(heightStr);
 
+        if ("lb".equals(wu)) weight *= 0.45359237;
+        if ("ft".equals(hu)) height *= 30.48;
+
         if (currentUser == null) currentUser = new Pessoa();
         currentUser.nome = name;
         currentUser.dataNascimento = birthDate;
@@ -275,13 +286,19 @@ public class ProfileAndSettingsFragment extends Fragment {
                 .addOnFailureListener(e -> toast("Failed to save Firebase: " + e.getMessage()));
     }
 
-    // 🔹 Save new password
-    private void savePassword() {
-        String oldPass = binding.etCurrentPass.getText().toString().trim();
-        String newPass = binding.etNewPass.getText().toString().trim();
+    // 🔹 Edit password and email
+    private void saveCredentials() {
+        String email = Objects.requireNonNull(binding.etEmail.getText()).toString().trim();
+        String oldPass = Objects.requireNonNull(binding.etCurrentPass.getText()).toString().trim();
+        String newPass = Objects.requireNonNull(binding.etNewPass.getText()).toString().trim();
 
         if (oldPass.isEmpty()) {
             toast("Enter your current password");
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            toast("Enter a valid email");
             return;
         }
 
@@ -302,15 +319,41 @@ public class ProfileAndSettingsFragment extends Fragment {
             return;
         }
 
-        // 🔐 Reautenticação obrigatória antes de mudar password
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        auth.signInWithEmailAndPassword(fbUser.getEmail(), oldPass)
-                .addOnSuccessListener(authResult -> {
+        AuthCredential credential = EmailAuthProvider.getCredential(fbUser.getEmail(), oldPass);
+
+        fbUser.reauthenticate(credential)
+                .addOnSuccessListener(aVoid -> {
+                    boolean emailChanged = !email.equalsIgnoreCase(fbUser.getEmail());
+
+                    // 🔹 1. Update password immediately
                     fbUser.updatePassword(newPass)
-                            .addOnSuccessListener(aVoid -> toast("Password updated successfully ✅"))
-                            .addOnFailureListener(e -> toast("Error updating password: " + e.getMessage()));
+                            .addOnSuccessListener(aVoid1 -> toast("Password Updated"))
+                            .addOnFailureListener(e -> toast("Password update failed: " + e.getMessage()));
+
+                    // 🔹 2. Send verification link for new email
+                    if (emailChanged) {
+                        fbUser.verifyBeforeUpdateEmail(email)
+                                .addOnSuccessListener(unused -> {
+                                    toast("Confirm in your E-mail the Changes");
+
+                                    DatabaseReference dbRef = FirebaseDatabase.getInstance(
+                                                    "https://onfire-padm-default-rtdb.europe-west1.firebasedatabase.app"
+                                            ).getReference("users")
+                                            .child(fbUser.getUid())
+                                            .child("info")
+                                            .child("email");
+
+                                    dbRef.setValue(email)
+                                            .addOnSuccessListener(aVoid2 ->
+                                                    toast("Database email updated — verify your inbox to confirm."))
+                                            .addOnFailureListener(e ->
+                                                    toast("Failed to update DB: " + e.getMessage()));
+                                })
+                                .addOnFailureListener(e ->
+                                        toast("Error sending verification email: " + e.getMessage()));
+                    }
                 })
-                .addOnFailureListener(e -> toast("Current password is incorrect ❌"));
+                .addOnFailureListener(e -> toast("Reauthentication failed: " + e.getMessage()));
     }
 
     private String validatePassword(String password) {

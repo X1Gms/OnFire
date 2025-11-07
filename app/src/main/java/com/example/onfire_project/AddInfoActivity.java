@@ -186,7 +186,7 @@ public class AddInfoActivity extends AppCompatActivity {
                         Log.d("FirebaseUpload", entry.getKey() + " -> " + entry.getValue());
                     }
                     toast("Saved Successfully!");
-                    Intent intent = new Intent(AddInfoActivity.this, DashboardActivity.class);
+                    Intent intent = new Intent(AddInfoActivity.this, RequestPermissionsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();

@@ -22,13 +22,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 public class DashboardFragment extends Fragment {
 
@@ -80,7 +77,8 @@ public class DashboardFragment extends Fragment {
         final String uid = fbUser.getUid();
 
         firebaseManager.getUserInfo(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override public void onDataChange(@NonNull DataSnapshot snap) {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snap) {
                 Pessoa p = snap.getValue(Pessoa.class);
                 if (p != null && p.email != null) {
                     currentUser = p;
@@ -100,7 +98,8 @@ public class DashboardFragment extends Fragment {
                 }
             }
 
-            @Override public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(getContext(), "Failed to load user", Toast.LENGTH_SHORT).show();
             }
         });
@@ -113,10 +112,6 @@ public class DashboardFragment extends Fragment {
             tvWelcomeUser.setText("Hello!");
     }
 
-    /**
-     * Lê as atividades da Firebase, sincroniza com SQLite e atualiza o dashboard.
-     */
-
     private void showEmptyLastActivity() {
         tvActivityTime.setText("--");
         tvDistanceValue.setText("0.00 km");
@@ -125,59 +120,70 @@ public class DashboardFragment extends Fragment {
 
         updateONUProgress(false);
     }
-        /**
-     * Calcula o progresso semanal (steps, km, minutos) e atualiza os cards ONU
-     */
-        private void updateONUProgress(boolean updateLastActivity) {
 
-            List<Atividade> atividades = repo.getAllAtividades(currentUser.email);
-            int steps = 0;
-            double km = 0;
-            int totalSeconds = 0;
+    private void updateONUProgress(boolean updateLastActivity) {
 
+        if (currentUser == null) {
+            showEmptyLastActivity();
+            return;
+        }
+
+        List<Atividade> atividades = repo.getAllAtividades(currentUser.email);
+        int steps = 0;
+        double km = 0;
+        int totalSeconds = 0;
+
+        if (atividades != null) {
             for (Atividade a : atividades) {
+                if (a == null) continue;
                 steps += a.pacos;
                 km += a.distancia;
 
-                // Parse time "HH:mm:ss"
                 if (a.tempo != null && !a.tempo.isEmpty()) {
                     String[] parts = a.tempo.split(":");
                     if (parts.length == 3) {
-                        int hours = Integer.parseInt(parts[0]);
-                        int minutes = Integer.parseInt(parts[1]);
-                        int seconds = Integer.parseInt(parts[2]);
-                        totalSeconds += hours * 3600 + minutes * 60 + seconds;
+                        try {
+                            int hours = Integer.parseInt(parts[0]);
+                            int minutes = Integer.parseInt(parts[1]);
+                            int seconds = Integer.parseInt(parts[2]);
+                            totalSeconds += hours * 3600 + minutes * 60 + seconds;
+                        } catch (NumberFormatException e) {
+                            Log.w("DashboardFragment", "Tempo inválido em atividade: " + a.tempo);
+                        }
                     }
                 }
             }
-
-            int totalMinutes = totalSeconds / 60;
-
-            // ✅ Prevent crash when no activities exist
-            if (updateLastActivity && atividades != null && !atividades.isEmpty()) {
-                Atividade primeiraAtividade = atividades.get(0);
-
-                tvDistanceValue.setText(String.format(Locale.getDefault(), "%.2f km", primeiraAtividade.distancia));
-                tvDurationValue.setText(primeiraAtividade.tempo != null ? primeiraAtividade.tempo : "--:--:--");
-                tvCaloriesValue.setText(String.format(Locale.getDefault(), "%d kcal", primeiraAtividade.calorias));
-            } else if (updateLastActivity) {
-                // Optional: handle case with no activities
-                tvDistanceValue.setText("0.00 km");
-                tvDurationValue.setText("--:--:--");
-                tvCaloriesValue.setText("0 kcal");
-            }
-
-            // --- Atualiza os cards da secção ONU ---
-            tvSteps.setText(String.format(Locale.getDefault(), "%d", steps));
-            tvKilometers.setText(String.format(Locale.getDefault(), "%.2f", km));
-
-            progressSteps.setMax(ONU_STEPS);
-            progressSteps.setProgress(Math.min(steps, ONU_STEPS));
-
-            progressTime.setMax(ONU_MINUTES);
-            progressTime.setProgress(Math.min(totalMinutes, ONU_MINUTES));
-
-            tvStepsGoal.setText(String.format(Locale.getDefault(), "%d / %d steps", steps, ONU_STEPS));
-            tvTimeGoal.setText(String.format(Locale.getDefault(), "%d / %d min", totalMinutes, ONU_MINUTES));
         }
+
+        int totalMinutes = totalSeconds / 60;
+
+        // ✅ Mostra a ÚLTIMA atividade
+        if (updateLastActivity && atividades != null && !atividades.isEmpty()) {
+            Atividade ultimaAtividade = atividades.get(atividades.size() - 1);
+
+            tvActivityTime.setText(ultimaAtividade.data != null ? ultimaAtividade.data : "No date");
+            tvDistanceValue.setText(String.format(Locale.getDefault(), "%.2f km", ultimaAtividade.distancia));
+            tvDurationValue.setText(ultimaAtividade.tempo != null ? ultimaAtividade.tempo : "--:--:--");
+            tvCaloriesValue.setText(String.format(Locale.getDefault(), "%d kcal", ultimaAtividade.calorias));
+
+        } else if (updateLastActivity) {
+            tvDistanceValue.setText("0.00 km");
+            tvDurationValue.setText("--:--:--");
+            tvCaloriesValue.setText("0 kcal");
+            tvActivityTime.setText("No date");
+        }
+
+        // --- Atualiza os cards da secção ONU ---
+        tvSteps.setText(String.format(Locale.getDefault(), "%d", steps));
+        tvKilometers.setText(String.format(Locale.getDefault(), "%.2f", km));
+
+        progressSteps.setMax(ONU_STEPS);
+        progressSteps.setProgress(Math.min(steps, ONU_STEPS));
+
+        progressTime.setMax(ONU_MINUTES);
+        progressTime.setProgress(Math.min(totalMinutes, ONU_MINUTES));
+
+        tvStepsGoal.setText(String.format(Locale.getDefault(), "%d / %d steps", steps, ONU_STEPS));
+        tvTimeGoal.setText(String.format(Locale.getDefault(), "%d / %d min", totalMinutes, ONU_MINUTES));
+    }
 }

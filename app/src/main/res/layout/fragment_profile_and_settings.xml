@@ -86,7 +86,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etAge"
                     android:hint="Birth Date"
-                    android:inputType="number"
+                    android:inputType="date"
                     android:textColor="@color/foreground"
                     android:textColorHint="@color/muted_foreground"
                     android:paddingStart="8dp"
@@ -210,7 +210,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveInfo"
-                android:text="Save Changes"
+                android:text="Save Credentials"
                 android:backgroundTint="@color/primary"
                 android:textColor="@color/primary_foreground"
                 android:layout_marginTop="24dp"
@@ -230,12 +230,39 @@
             android:orientation="vertical">
 
             <TextView
-                android:text="Password Recovery"
+                android:text="Edit Credentials"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:hintEnabled="false"
+                app:boxStrokeColor="@color/input_stroke_color"
+                app:boxBackgroundColor="@color/muted"
+                app:boxStrokeWidth="2dp"
+                app:boxStrokeWidthFocused="3dp"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/input_and_button_height"
+                android:maxWidth="315dp"
+                android:layout_marginTop="16dp"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    android:hint="E-mail"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/foreground"
+                    android:textColorHint="@color/muted_foreground"
+                    android:paddingStart="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"

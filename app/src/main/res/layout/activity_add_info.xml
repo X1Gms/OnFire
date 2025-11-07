@@ -76,7 +76,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etAge"
                 android:hint="@string/hint_birth_date"
-                android:inputType="number"
+                android:inputType="date"
                 android:includeFontPadding="false"
                 android:textColor="@color/foreground"
                 android:textColorHint="@color/muted_foreground"
