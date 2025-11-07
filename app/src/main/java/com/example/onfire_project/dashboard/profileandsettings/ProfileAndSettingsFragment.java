@@ -434,22 +434,47 @@ public class ProfileAndSettingsFragment extends Fragment {
 
     private void mergeAtividades(DataRepository repo, FirebaseManager firebaseManager, String uid,
                                  List<Atividade> localList, List<Atividade> remoteList) {
+
         Set<String> localKeys = new HashSet<>();
-        for (Atividade a : localList)
+        for (Atividade a : localList) {
             localKeys.add(a.data + "_" + a.tempo + "_" + a.tipoAtividade);
+        }
 
         Set<String> remoteKeys = new HashSet<>();
-        for (Atividade a : remoteList)
+        for (Atividade a : remoteList) {
             remoteKeys.add(a.data + "_" + a.tempo + "_" + a.tipoAtividade);
+        }
 
-        for (Atividade a : remoteList)
-            if (!localKeys.contains(a.data + "_" + a.tempo + "_" + a.tipoAtividade))
+        // 🔹 Puxa novas do Firebase -> adiciona ao SQLite se não existirem
+        for (Atividade a : remoteList) {
+            String key = a.data + "_" + a.tempo + "_" + a.tipoAtividade;
+            if (!localKeys.contains(key)) {
+                if (a.pessoaId == 0) {
+                    int pessoaId = repo.getPessoaByEmail(currentUser.email).id;
+                    a.pessoaId = pessoaId;
+                }
                 repo.insertAtividade(a);
+            }
+        }
 
-        for (Atividade a : localList)
-            if (!remoteKeys.contains(a.data + "_" + a.tempo + "_" + a.tipoAtividade))
+        // 🔹 Sobe novas do SQLite -> adiciona ao Firebase se não existirem
+        for (Atividade a : localList) {
+            String key = a.data + "_" + a.tempo + "_" + a.tipoAtividade;
+            if (!remoteKeys.contains(key)) {
                 firebaseManager.sendAtividadeToFirebase(uid, a);
+            }
+        }
+
+        // 🔹 Caso especial: SQLite vazio → importa tudo do Firebase
+        if (localList.isEmpty() && !remoteList.isEmpty()) {
+            int pessoaId = repo.getPessoaByEmail(currentUser.email).id;
+            for (Atividade a : remoteList) {
+                a.pessoaId = pessoaId;
+                repo.insertAtividade(a);
+            }
+        }
     }
+
 
     private void showDeleteConfirmationDialog() {
         new AlertDialog.Builder(requireContext())
