@@ -2,7 +2,10 @@ package com.example.onfire_project.dashboard.profileandsettings;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +15,33 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.onfire_project.HiActivity;
+import com.example.onfire_project.RecoverEmailActivity;
+import com.example.onfire_project.data.DataRepository;
+import com.example.onfire_project.data.FirebaseManager;
+import com.example.onfire_project.data.models.Atividade;
+import com.example.onfire_project.data.models.Pessoa;
 import com.example.onfire_project.databinding.FragmentProfileAndSettingsBinding;
-import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ProfileAndSettingsFragment extends Fragment {
 
     private FragmentProfileAndSettingsBinding binding;
+    private DataRepository repo;
+    private FirebaseManager firebaseManager;
+    private Pessoa currentUser;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -28,18 +50,111 @@ public class ProfileAndSettingsFragment extends Fragment {
         binding = FragmentProfileAndSettingsBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
+        repo = new DataRepository(requireContext());
+        firebaseManager = new FirebaseManager();
+
+        loadUserAndAtividades();
+        loadUserFromFirebase();
+
         setupSpinners();
         setupDatePicker();
         setupClicks();
+        setupAutoUpdate(); // optional auto-save on typing
 
         return view;
+    }
+
+    // 🔹 Carrega o utilizador atual e cria se não existir
+    private void loadUserAndAtividades() {
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null || fbUser.getEmail() == null) {
+            Toast.makeText(getContext(), "Usuário não logado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String email = fbUser.getEmail();
+        Pessoa local = repo.getPessoaByEmail(email);
+
+        if (local != null) {
+            currentUser = local;
+        } else {
+            currentUser = new Pessoa();
+            currentUser.email = email;
+            repo.savePessoa(currentUser);
+        }
+
+        loadAtividadesFromSQLite(email);
+    }
+
+    private void loadAtividadesFromSQLite(String email) {
+        List<Atividade> atividades = repo.getAllAtividades(email);
+        System.out.println("Atividades locais carregadas: " + atividades.size());
+    }
+
+    // 🔹 Load user from Firebase and sync with SQLite + UI
+    private void loadUserFromFirebase() {
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null) {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String uid = fbUser.getUid();
+
+        firebaseManager.getUserInfo(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snap) {
+                Pessoa p = snap.getValue(Pessoa.class);
+                if (p != null && p.email != null) {
+                    currentUser = p;
+                    repo.savePessoa(p); // ✅ update SQLite
+
+                    // ✅ update UI fields
+                    binding.etFullName.setText(p.nome);
+                    binding.etAge.setText(p.dataNascimento);
+                    binding.etWeight.setText(String.valueOf(p.peso));
+                    binding.etHeight.setText(String.valueOf(p.altura));
+
+                    if (p.genero != null) {
+                        switch (p.genero.toLowerCase()) {
+                            case "male":
+                                binding.spSex.setSelection(1);
+                                break;
+                            case "female":
+                                binding.spSex.setSelection(2);
+                                break;
+                            default:
+                                binding.spSex.setSelection(3);
+                                break;
+                        }
+                    }
+
+                } else {
+                    Pessoa local = repo.getPessoaByEmail(fbUser.getEmail());
+                    if (local != null) {
+                        currentUser = local;
+                        binding.etFullName.setText(local.nome);
+                        binding.etAge.setText(local.dataNascimento);
+                        binding.etWeight.setText(String.valueOf(local.peso));
+                        binding.etHeight.setText(String.valueOf(local.altura));
+                    } else {
+                        toast("No user data found");
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getContext(), "Failed to load user", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupSpinners() {
         ArrayAdapter<String> sexAdapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
-                new String[]{"Select sex","Male", "Female", "Other"}
+                new String[]{"Select sex", "Male", "Female", "Other"}
         );
         sexAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spSex.setAdapter(sexAdapter);
@@ -59,6 +174,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         );
         heightAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spHeightUnit.setAdapter(heightAdapter);
+
         binding.delForeverBtn.setOnClickListener(v -> showDeleteConfirmationDialog());
     }
 
@@ -78,17 +194,36 @@ public class ProfileAndSettingsFragment extends Fragment {
     private void setupClicks() {
         binding.btnSaveInfo.setOnClickListener(v -> savePersonalInfo());
         binding.btnSaveNewPassword.setOnClickListener(v -> savePassword());
-        binding.tvForgot.setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Redirect to password recovery", Toast.LENGTH_SHORT).show()
-        );
-        binding.ivSyncNow.setOnClickListener(v ->
-                Toast.makeText(requireContext(), "Syncing data...", Toast.LENGTH_SHORT).show()
-        );
+        binding.tvForgot.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), RecoverEmailActivity.class);
+            startActivity(intent);
+        });
+
+        binding.ivSyncNow.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Sincronizando dados...", Toast.LENGTH_SHORT).show();
+            syncAtividades();
+        });
     }
 
+    // 🔹 Auto update on typing
+    private void setupAutoUpdate() {
+        TextWatcher watcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                savePersonalInfo();
+            }
+        };
+        binding.etFullName.addTextChangedListener(watcher);
+        binding.etWeight.addTextChangedListener(watcher);
+        binding.etHeight.addTextChangedListener(watcher);
+    }
+
+    // 🔹 Save info to Firebase + SQLite
     private void savePersonalInfo() {
         String name = binding.etFullName.getText().toString().trim();
         String birthDate = binding.etAge.getText().toString().trim();
+        String sex = binding.spSex.getSelectedItem().toString();
         String weightStr = binding.etWeight.getText().toString().trim();
         String heightStr = binding.etHeight.getText().toString().trim();
 
@@ -113,9 +248,34 @@ public class ProfileAndSettingsFragment extends Fragment {
             return;
         }
 
-        toast("Personal info saved ✅");
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null) {
+            toast("User not logged in");
+            return;
+        }
+
+        double weight = Double.parseDouble(weightStr);
+        double height = Double.parseDouble(heightStr);
+
+        if (currentUser == null) currentUser = new Pessoa();
+        currentUser.nome = name;
+        currentUser.dataNascimento = birthDate;
+        currentUser.genero = sex;
+        currentUser.peso = weight;
+        currentUser.altura = height;
+        currentUser.email = fbUser.getEmail();
+
+        // ✅ update SQLite
+        repo.savePessoa(currentUser);
+
+        // ✅ update Firebase
+        String uid = fbUser.getUid();
+        firebaseManager.saveUserInfo(uid, currentUser)
+                .addOnSuccessListener(aVoid -> toast("Info saved to Firebase ✅"))
+                .addOnFailureListener(e -> toast("Failed to save Firebase: " + e.getMessage()));
     }
 
+    // 🔹 Save new password
     private void savePassword() {
         String oldPass = binding.etCurrentPass.getText().toString().trim();
         String newPass = binding.etNewPass.getText().toString().trim();
@@ -130,49 +290,179 @@ public class ProfileAndSettingsFragment extends Fragment {
             return;
         }
 
-        // ✅ Usa a validação completa
         String validationError = validatePassword(newPass);
         if (validationError != null) {
             toast(validationError);
             return;
         }
 
-        toast("Password updated ✅");
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null || fbUser.getEmail() == null) {
+            toast("User not logged in");
+            return;
+        }
+
+        // 🔐 Reautenticação obrigatória antes de mudar password
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.signInWithEmailAndPassword(fbUser.getEmail(), oldPass)
+                .addOnSuccessListener(authResult -> {
+                    fbUser.updatePassword(newPass)
+                            .addOnSuccessListener(aVoid -> toast("Password updated successfully ✅"))
+                            .addOnFailureListener(e -> toast("Error updating password: " + e.getMessage()));
+                })
+                .addOnFailureListener(e -> toast("Current password is incorrect ❌"));
     }
 
     private String validatePassword(String password) {
-        if (password.length() < 8) {
-            return "Password must have at least 8 characters.";
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            return "Password must contain at least one uppercase letter.";
-        }
-        if (!password.matches(".*[a-z].*")) {
-            return "Password must contain at least one lowercase letter.";
-        }
-        if (!password.matches(".*\\d.*")) {
-            return "Password must contain at least one number.";
-        }
-        if (!password.matches(".*[!@#$%^&*()_+=\\-{}\\[\\]:;\"'<>,.?/`~|\\\\].*")) {
+        if (password.length() < 8) return "Password must have at least 8 characters.";
+        if (!password.matches(".*[A-Z].*")) return "Password must contain at least one uppercase letter.";
+        if (!password.matches(".*[a-z].*")) return "Password must contain at least one lowercase letter.";
+        if (!password.matches(".*\\d.*")) return "Password must contain at least one number.";
+        if (!password.matches(".*[!@#$%^&*()_+=\\-{}\\[\\]:;\"'<>,.?/~|\\\\].*"))
             return "Password must contain at least one special character.";
-        }
         return null;
+    }
+
+    // 🔹 Sync atividades Firebase ↔ SQLite
+    private void syncAtividades() {
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null || fbUser.getEmail() == null) {
+            Toast.makeText(getContext(), "Usuário não logado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String email = fbUser.getEmail();
+        if (repo == null) repo = new DataRepository(requireContext());
+        if (currentUser == null) {
+            currentUser = repo.getPessoaByEmail(email);
+            if (currentUser == null) {
+                currentUser = new Pessoa();
+                currentUser.email = email;
+                repo.savePessoa(currentUser);
+            }
+        }
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance(
+                "https://onfire-padm-default-rtdb.europe-west1.firebasedatabase.app"
+        ).getReference("users");
+
+        usersRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult() == null) {
+                Toast.makeText(getContext(), "Erro ao aceder ao Firebase", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String foundUid = null;
+            for (DataSnapshot snap : task.getResult().getChildren()) {
+                DataSnapshot info = snap.child("info");
+                String emailFirebase = info.child("email").getValue(String.class);
+                if (emailFirebase != null && emailFirebase.equalsIgnoreCase(email)) {
+                    foundUid = snap.getKey();
+                    break;
+                }
+            }
+
+            if (foundUid == null) {
+                foundUid = email.replace(".", "_").replace("@", "_");
+                usersRef.child(foundUid).child("info").child("email").setValue(email);
+            }
+
+            String uidToUse = foundUid;
+
+            List<Atividade> localAtividades = repo.getAllAtividades(email);
+            firebaseManager.getUserActivities(uidToUse).get().addOnCompleteListener(task2 -> {
+                if (!task2.isSuccessful() || task2.getResult() == null) {
+                    Toast.makeText(getContext(), "Erro ao ler atividades Firebase", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                List<Atividade> remoteAtividades = new ArrayList<>();
+                for (DataSnapshot snap : task2.getResult().getChildren()) {
+                    Atividade a = snap.getValue(Atividade.class);
+                    if (a != null) remoteAtividades.add(a);
+                }
+
+                mergeAtividades(repo, firebaseManager, uidToUse, localAtividades, remoteAtividades);
+                loadAtividadesFromSQLite(email);
+                Toast.makeText(getContext(), "Sincronização concluída!", Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+    private void mergeAtividades(DataRepository repo, FirebaseManager firebaseManager, String uid,
+                                 List<Atividade> localList, List<Atividade> remoteList) {
+        Set<String> localKeys = new HashSet<>();
+        for (Atividade a : localList)
+            localKeys.add(a.data + "_" + a.tempo + "_" + a.tipoAtividade);
+
+        Set<String> remoteKeys = new HashSet<>();
+        for (Atividade a : remoteList)
+            remoteKeys.add(a.data + "_" + a.tempo + "_" + a.tipoAtividade);
+
+        for (Atividade a : remoteList)
+            if (!localKeys.contains(a.data + "_" + a.tempo + "_" + a.tipoAtividade))
+                repo.insertAtividade(a);
+
+        for (Atividade a : localList)
+            if (!remoteKeys.contains(a.data + "_" + a.tempo + "_" + a.tipoAtividade))
+                firebaseManager.sendAtividadeToFirebase(uid, a);
     }
 
     private void showDeleteConfirmationDialog() {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Delete Account")
-                .setMessage("Do you really wish to delete your own account? This action will delete both activity history and information account")
-                .setNegativeButton("CANCELAR", null)
-                .setPositiveButton("CONFIRMAR", (dialog, which) -> deleteAccountForever())
+                .setMessage("Do you really wish to delete your account? This will erase all activity and info.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Confirm", (dialog, which) -> deleteAccountForever())
                 .create()
                 .show();
     }
 
     private void deleteAccountForever() {
-        toast("Conta excluída permanentemente");
-    }
+        FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (fbUser == null || fbUser.getEmail() == null) {
+            toast("Usuário não logado");
+            return;
+        }
 
+        String email = fbUser.getEmail();
+        DatabaseReference usersRef = FirebaseDatabase.getInstance(
+                "https://onfire-padm-default-rtdb.europe-west1.firebasedatabase.app"
+        ).getReference("users");
+
+        usersRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                for (DataSnapshot snap : task.getResult().getChildren()) {
+                    DataSnapshot info = snap.child("info");
+                    String emailFirebase = info.child("email").getValue(String.class);
+                    if (emailFirebase != null && emailFirebase.equalsIgnoreCase(email)) {
+                        usersRef.child(snap.getKey()).removeValue()
+                                .addOnSuccessListener(aVoid -> toast("Dados Firebase apagados"))
+                                .addOnFailureListener(e -> toast("Erro ao apagar dados Firebase"));
+                        break;
+                    }
+                }
+            } else {
+                toast("Erro ao verificar Firebase");
+            }
+        });
+
+        fbUser.delete()
+                .addOnSuccessListener(aVoid -> toast("Conta FirebaseAuth apagada"))
+                .addOnFailureListener(e -> toast("Erro ao apagar FirebaseAuth: " + e.getMessage()));
+
+        try {
+            repo.clearAllTables();
+            toast("SQLite limpo com sucesso");
+        } catch (Exception e) {
+            toast("Erro ao limpar SQLite: " + e.getMessage());
+        }
+
+        Intent intent = new Intent(requireContext(), HiActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        requireActivity().finish();
+    }
 
     private void toast(String msg) {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();

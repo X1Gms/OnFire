@@ -15,12 +15,12 @@
 
     <string name="motivation_message">Let\'s make today a step towards your best!</string>
     <string name="last_activity">Last Activity</string>
-    <string name="activity_time">Today, 17:30</string>
-    <string name="distance_value">10.6 km</string>
+    <string name="activity_time">-- : --</string>
+    <string name="distance_value">0 km</string>
     <string name="distance">Distance</string>
-    <string name="duration_value">1h 10min</string>
+    <string name="duration_value">-- : --</string>
     <string name="duration">Duration</string>
-    <string name="calories_value">740 kcal</string>
+    <string name="calories_value">0 kcal</string>
     <string name="calories">Calories</string>
     <string name="weekly_progress">Weekly Progress</string>
     <string name="steps_value">50 349</string>

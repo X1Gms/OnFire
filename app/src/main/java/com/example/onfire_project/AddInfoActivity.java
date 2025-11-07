@@ -3,6 +3,7 @@ package com.example.onfire_project;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -11,9 +12,20 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.onfire_project.data.LocalDatabaseHelper;
+import com.example.onfire_project.data.models.Pessoa;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class AddInfoActivity extends AppCompatActivity {
 
@@ -21,10 +33,20 @@ public class AddInfoActivity extends AppCompatActivity {
     private Spinner spSex, spWeightUnit, spHeightUnit;
     private MaterialButton btnGo;
 
+    private FirebaseAuth auth;
+    private DatabaseReference dbRef;
+    private LocalDatabaseHelper localDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_info);
+
+        auth = FirebaseAuth.getInstance();
+        dbRef = FirebaseDatabase.getInstance(
+                "https://onfire-padm-default-rtdb.europe-west1.firebasedatabase.app"
+        ).getReference("users");
+        localDb = new LocalDatabaseHelper(this);
 
         initViews();
         setUpDateInput();
@@ -43,9 +65,8 @@ public class AddInfoActivity extends AppCompatActivity {
         btnGo = findViewById(R.id.btnGo);
     }
 
-    private void setUpDateInput(){
+    private void setUpDateInput() {
         Calendar calendar = Calendar.getInstance();
-
         etBirthDate.setOnClickListener(v -> {
             int year = calendar.get(Calendar.YEAR);
             int month = calendar.get(Calendar.MONTH);
@@ -54,11 +75,12 @@ public class AddInfoActivity extends AppCompatActivity {
             DatePickerDialog datePickerDialog = new DatePickerDialog(
                     this,
                     (DatePicker view, int selectedYear, int selectedMonth, int selectedDay) -> {
-                        String date = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                        // força o formato dd/MM/yyyy (ex: 05/11/2025)
+                        String date = String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                                selectedDay, selectedMonth + 1, selectedYear);
                         etBirthDate.setText(date);
                     },
                     year, month, day);
-
             datePickerDialog.show();
         });
     }
@@ -67,7 +89,7 @@ public class AddInfoActivity extends AppCompatActivity {
         ArrayAdapter<String> sexAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
-                new String[]{"Select sex","Male", "Female", "Other"}
+                new String[]{"Select sex", "Male", "Female", "Other"}
         );
         sexAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spSex.setAdapter(sexAdapter);
@@ -90,64 +112,86 @@ public class AddInfoActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        btnGo.setOnClickListener(v -> {
-            String name = etFullName.getText().toString().trim();
-            String ageStr = etBirthDate.getText().toString().trim();
-            String sex = (String) spSex.getSelectedItem();
-            String wu = (String) spWeightUnit.getSelectedItem();
-            String hu = (String) spHeightUnit.getSelectedItem();
-            double w = parse(etWeight.getText().toString());
-            double h = parse(etHeight.getText().toString());
+        btnGo.setOnClickListener(v -> saveUserInfo());
+    }
 
-            if (name.isEmpty()) {
-                Toast.makeText(this, "Please enter your full name", Toast.LENGTH_SHORT).show();
-                return;
-            }
+    private void saveUserInfo() {
+        Log.d("AddInfoActivity", "saveUserInfo() triggered");
+        String name = etFullName.getText().toString().trim();
+        String birthDateStr = etBirthDate.getText().toString().trim();
+        String sex = (String) spSex.getSelectedItem();
+        String wu = (String) spWeightUnit.getSelectedItem();
+        String hu = (String) spHeightUnit.getSelectedItem();
+        double w = parse(etWeight.getText().toString());
+        double h = parse(etHeight.getText().toString());
 
-            if (ageStr.isEmpty()) {
-                Toast.makeText(this, "Please enter your age", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (name.isEmpty() || birthDateStr.isEmpty() || spSex.getSelectedItemPosition() == 0 || w <= 0 || h <= 0) {
+            toast("Please fill all fields correctly");
+            return;
+        }
 
-            int age;
-            try {
-                age = Integer.parseInt(ageStr);
-            } catch (NumberFormatException e) {
-                Toast.makeText(this, "Invalid age format", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // cálculo simples da idade (sem parse falhar)
+        int age = 0;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date birthDate = sdf.parse(birthDateStr);
+            Calendar birthCal = Calendar.getInstance();
+            birthCal.setTime(birthDate);
+            Calendar today = Calendar.getInstance();
+            age = today.get(Calendar.YEAR) - birthCal.get(Calendar.YEAR);
+            if (today.get(Calendar.DAY_OF_YEAR) < birthCal.get(Calendar.DAY_OF_YEAR)) age--;
+        } catch (Exception ignored) {}
 
-            if (age < 10 || age > 100) {
-                Toast.makeText(this, "Enter a valid age (10–100)", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if (age < 10 || age > 100) {
+            toast("Enter a valid birth date (10–100 years old)");
+            return;
+        }
 
-            if (spSex.getSelectedItemPosition() == 0) {
-                Toast.makeText(this, "Please select your sex", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        if ("lb".equals(wu)) w *= 0.45359237;
+        if ("ft".equals(hu)) h *= 30.48;
 
-            if (w <= 0) {
-                Toast.makeText(this, "Please enter a valid weight", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) {
+            toast("User not authenticated");
+            return;
+        }
 
-            if (h <= 0) {
-                Toast.makeText(this, "Please enter a valid height", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        String email = user.getEmail();
+        String uid = user.getUid();
 
-            if ("lb".equals(wu)) w *= 0.45359237;
-            if ("ft".equals(hu)) h *= 30.48;
+        // guarda localmente
+        Pessoa pessoa = new Pessoa();
+        pessoa.nome = name;
+        pessoa.dataNascimento = birthDateStr;
+        pessoa.genero = sex;
+        pessoa.altura = h;
+        pessoa.peso = w;
+        pessoa.email = email;
+        Log.d("","Aqui fui");
+        localDb.insertOrUpdatePessoa(pessoa);
 
-            Toast.makeText(
-                    this,
-                    "Saved Successfully!",
-                    Toast.LENGTH_LONG
-            ).show();
+        // guarda na Firebase
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("name", name);
+        userMap.put("birthDate", birthDateStr);
+        userMap.put("sex", sex);
+        userMap.put("height", h);
+        userMap.put("weight", w);
+        userMap.put("email", email);
+        Log.d("","Aqui fui 2");
 
-            startActivity(new Intent(this, RequestPermissionsActivity.class));
-        });
+        dbRef.child(uid).child("info").setValue(userMap)
+                .addOnSuccessListener(unused -> {
+                    for (Map.Entry<String, Object> entry : userMap.entrySet()) {
+                        Log.d("FirebaseUpload", entry.getKey() + " -> " + entry.getValue());
+                    }
+                    toast("Saved Successfully!");
+                    Intent intent = new Intent(AddInfoActivity.this, DashboardActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> toast("Error saving data: " + e.getMessage()));
     }
 
     private double parse(String s) {
@@ -156,5 +200,9 @@ public class AddInfoActivity extends AppCompatActivity {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

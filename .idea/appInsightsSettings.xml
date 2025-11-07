@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.onfire_project" />
+                  <option name="mobileSdkAppId" value="1:2717343863:android:2b970689ac883199ec2672" />
+                  <option name="projectId" value="onfire-padm" />
+                  <option name="projectNumber" value="2717343863" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

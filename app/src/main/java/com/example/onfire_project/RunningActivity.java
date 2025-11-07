@@ -29,6 +29,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 
+import com.example.onfire_project.data.LocalDatabaseHelper;
+import com.example.onfire_project.data.models.Atividade;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -47,7 +54,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     // Constantes para cálculo baseado em passos
     private static final double AVERAGE_STRIDE_LENGTH_METERS = 0.78;
     private static final double CALORIES_PER_STEP = 0.04;
-
+    private LocalDatabaseHelper localdb;
     private MapView map;
     private MyLocationNewOverlay myLocationOverlay;
     private IMapController mapController;
@@ -130,7 +137,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         Configuration.getInstance().setUserAgentValue(getApplicationContext().getPackageName());
 
         setContentView(R.layout.activity_running);
-
+        localdb = new LocalDatabaseHelper(this);
         initializeViews();
         initializeMap();
         initializeLocationManager();
@@ -608,8 +615,39 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     }
 
     private void saveToDatabase(String jsonData) {
-        Log.i("Database", "Saving to database: " + jsonData);
-        // TODO: Implementar o envio para a base de dados
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            try {
+                JSONObject obj = new JSONObject(jsonData);
+                String email = currentUser.getEmail();
+
+                Atividade a = new Atividade();
+                a.pessoaId = localdb.getPessoaIdByEmail(email);
+                a.tempo = obj.optString("duration");
+                a.distancia = obj.optDouble("distance");
+                a.ritmo = parsePaceToDouble(obj.optString("pace"));
+                a.pacos = obj.optInt("steps");
+                a.tipoAtividade = obj.optString("type");
+                a.calorias = obj.optInt("calories");
+                a.data = java.time.LocalDate.now().toString();
+
+                localdb.insertAtividade(a);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private double parsePaceToDouble(String pace) {
+        // converte "5:33" → 5.55 (exemplo)
+        try {
+            String[] parts = pace.split(":");
+            int min = Integer.parseInt(parts[0]);
+            int sec = Integer.parseInt(parts[1]);
+            return min + sec / 60.0;
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
 
     private void returnToDashboard() {
