@@ -48,30 +48,41 @@ import java.util.Locale;
 
 public class RunningActivity extends AppCompatActivity implements SensorEventListener {
 
+    //Intervalo mínimo pedido ao LocationManager
     private static final int MIN_LOCATION_UPDATE_MS = 1000;
+    //Distância mínima em metros para receber atualizações
     private static final float MIN_LOCATION_UPDATE_M = 1f;
 
-    // Constantes para cálculo baseado em passos
+    //Comprimento médio de um passo
+    //1 Passo = 0.78 metros
     private static final double AVERAGE_STRIDE_LENGTH_METERS = 0.78;
+    //Calorias por passo ( 1 passo = 0.04)
     private static final double CALORIES_PER_STEP = 0.04;
+    //Helper local para recuperar e inserir dados na base de dados local (SQLite)
     private LocalDatabaseHelper localdb;
+    //Variáveis de controlo do mapa
     private MapView map;
     private MyLocationNewOverlay myLocationOverlay;
     private IMapController mapController;
-
+    //Gerir a localização
     private LocationManager locationManager;
+    //Variável para guardar a última localização
     private Location latestLocation;
 
     private LinearLayout cancelBtn;
     private LinearLayout modeBtn;
     private ImageView modeIcon;
 
+    //Distância total estimada
     private double totalDistanceMeters = 0.0;
 
-    // Timer bookkeeping
+    // Medem quando foi começado a sessão e tempo acumulado quando em pausa
     private long startTimeMillis = 0L;
     private long pausedOffsetMillis = 0L;
+
+    //Agendar atualizações na UI
     private Handler timerHandler = new Handler(Looper.getMainLooper());
+    //Rotina que atualiza a UI a cada segundo
     private Runnable timerRunnable;
 
     // UI
@@ -97,6 +108,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     private Sensor stepDetector;
     private Sensor stepCounter;
     private boolean useStepDetector = false;
+    //Calcular passos desde o início da sessão
     private long stepBaseline = -1L;
     private int stepsSinceStart = 0;
 
@@ -110,6 +122,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
 
     // Enum para os modos de atividade
     private enum ActivityMode {
+        //Enumeradores para mudar os modos de atividade, de forma eficiente
         RUNNING(R.drawable.ic_running, "Running", "Time", "Pace", "Kilometers"),
         CYCLING(R.drawable.ic_cycling, "Cycling", "Time", "Speed", "Kilometers"),
         WALKING(R.drawable.ic_walking, "Walking", "Time", "Kilometers", "Calories");
@@ -117,7 +130,6 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         final int iconRes;
         final String displayName;
         final String label1, label2, label3;
-
         ActivityMode(int iconRes, String displayName, String label1, String label2, String label3) {
             this.iconRes = iconRes;
             this.displayName = displayName;
@@ -137,6 +149,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         Configuration.getInstance().setUserAgentValue(getApplicationContext().getPackageName());
 
         setContentView(R.layout.activity_running);
+        //Instancia a base de dados local
         localdb = new LocalDatabaseHelper(this);
         initializeViews();
         initializeMap();
@@ -175,6 +188,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         modeBtn = findViewById(R.id.modeActivity);
         modeIcon = findViewById(R.id.imageView9); // ID do ImageView no modeActivity
 
+        //Modificação do comportamento no botão de Regressar
         OnBackPressedCallback callback =
                 new OnBackPressedCallback(true) {
                     @Override
@@ -212,10 +226,12 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    //Obtém o serviço de localização
     private void initializeLocationManager() {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
+    //Iniciar os sensor de atividade física, calculando os passos
     private void initializeSensors() {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager != null) {
@@ -228,6 +244,8 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
     private void initializeTimer() {
         // Runnable do timer (atualiza UI a cada segundo)
         timerRunnable = new Runnable() {
+            //Calcula a cada segundo o tempo inical + acumulado desde o inicio da atividade
+            //Calcula o tempo em pausa.
             @Override
             public void run() {
                 long elapsed = 0L;
@@ -261,6 +279,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
                     speedKmhStored = speedKmh;
                 }
 
+                //Re-agendamento do timerRunnable
                 timerHandler.postDelayed(this, 1000);
             }
         };
@@ -360,6 +379,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
 
     private void updateRunningMode(long elapsed, double km) {
         // Pace (min/km)
+        //Verifica se há sessão e distância superior a 1 metro e se o tempo passado é superior a 0
         if (sessionStarted && totalDistanceMeters >= 1.0 && elapsed > 0) {
             double timeSecs = elapsed / 1000.0;
             double paceSecPerKm = timeSecs / (totalDistanceMeters / 1000.0);
@@ -454,10 +474,10 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         if (sessionStarted) {
             String json = stopSession();
             saveToDatabase(json);
-            Log.d("RunningActivity", "Activity data saved: " + json);
         }
     }
 
+    //Verificar que o GPS foi inicializado
     private void updateGpsStatus(boolean obtained) {
         gpsObtained = obtained;
         if (statusGPS != null) {
@@ -472,11 +492,13 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         }
     }
 
+    //Verificação se as permissões de localização de aproximação e precisa foram concedidas
     private boolean hasLocationPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    //Verifica se tem a permissão de atividade ativada
     private boolean hasActivityRecognitionPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED;
@@ -614,6 +636,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         return json;
     }
 
+    //Obter dados do JSON, processá-los e enviar para a Base de Dados Local
     private void saveToDatabase(String jsonData) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -657,6 +680,7 @@ public class RunningActivity extends AppCompatActivity implements SensorEventLis
         finish();
     }
 
+    //Centra o mapa e mostra a localização
     private void startLocationUpdates() {
         if (!hasLocationPermissions()) return;
 

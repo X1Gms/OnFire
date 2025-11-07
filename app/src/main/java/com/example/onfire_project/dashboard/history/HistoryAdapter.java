@@ -25,13 +25,17 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         this.items = items;
     }
 
+    //Lista persistente de dados
     public static class ViewHolder extends RecyclerView.ViewHolder {
+
+
         ConstraintLayout mainLayout;
         ImageView imageActivity, magicBtn;
         TextView tvDate, tvKm, tvTime;
         TextView resLbl0, resVal0, resLbl1, resVal1, resLbl2, resVal2;
         boolean isExpanded = false;
 
+        //Associa valores aos itens do XML
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             mainLayout = itemView.findViewById(R.id.mainLayout);
@@ -56,6 +60,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         return new ViewHolder(v);
     }
 
+    //Formatação da data
     private String formatDate(String isoDate) {
         try {
             SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd");
@@ -67,6 +72,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         }
     }
 
+    //Definição de propriedades colocadas (imagem diferentes, ritmo para as corridas, velocidade para bicicleta)
     @Override
     public void onBindViewHolder(@NonNull HistoryAdapter.ViewHolder holder, int position) {
         HistoryItem item = items.get(position);
@@ -117,7 +123,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                 break;
         }
 
-        // Configurar o clique do magicBtn
+        // Configurar o clique do magicBtn, expandir para ver mais detalhes
         holder.magicBtn.setOnClickListener(v -> {
             if (holder.isExpanded) {
                 // Recolher
@@ -147,6 +153,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         }
     }
 
+    //Visibilidade de itens escondidos
     private void setDetailsVisibility(ViewHolder holder, int visibility) {
         holder.resLbl0.setVisibility(visibility);
         holder.resVal0.setVisibility(visibility);
@@ -156,11 +163,13 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         holder.resVal2.setVisibility(visibility);
     }
 
+    //Obter número de itens
     @Override
     public int getItemCount() {
         return items.size();
     }
 
+    //Atualização da lista
     public void updateList(List<HistoryItem> newList) {
         items.clear();
         items.addAll(newList);

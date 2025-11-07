@@ -48,9 +48,7 @@ public class RequestPermissionsActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Verifica se todas as permissões obrigatórias estão concedidas
-     */
+    //Verifica se todas as permissões obrigatórias estão concedidas
     private boolean hasAllRequiredPermissions() {
         // Activity Recognition (Android 10+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -59,14 +57,6 @@ public class RequestPermissionsActivity extends AppCompatActivity {
                 return false;
             }
         }
-
-//        // Storage
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-//                != PackageManager.PERMISSION_GRANTED ||
-//                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                        != PackageManager.PERMISSION_GRANTED) {
-//            return false;
-//        }
 
         // Location
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -79,9 +69,7 @@ public class RequestPermissionsActivity extends AppCompatActivity {
         return true;
     }
 
-    /**
-     * Fluxo sequencial para pedir permissões em falta
-     */
+    // Fluxo sequencial para pedir permissões em falta
     private void requestNextMissingPermission() {
         switch (currentStage) {
             case STAGE_ACTIVITY:
@@ -99,23 +87,6 @@ public class RequestPermissionsActivity extends AppCompatActivity {
                 currentStage = STAGE_LOCATION;
                 requestNextMissingPermission();
                 break;
-
-//            case STAGE_STORAGE:
-//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-//                        != PackageManager.PERMISSION_GRANTED ||
-//                        ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//                                != PackageManager.PERMISSION_GRANTED) {
-//                    ActivityCompat.requestPermissions(this,
-//                            new String[]{
-//                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-//                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-//                            },
-//                            REQ_STORAGE);
-//                    return;
-//                }
-//                currentStage = STAGE_LOCATION;
-//                requestNextMissingPermission();
-//                break;
 
             case STAGE_LOCATION:
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -160,9 +131,8 @@ public class RequestPermissionsActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Processa as respostas das permissões
-     */
+    // Processa as respostas das permissões
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -183,22 +153,6 @@ public class RequestPermissionsActivity extends AppCompatActivity {
                     return;
                 }
                 break;
-
-//            case REQ_STORAGE:
-//                boolean storageGranted = true;
-//                for (int result : grantResults) {
-//                    if (result != PackageManager.PERMISSION_GRANTED) {
-//                        storageGranted = false;
-//                        break;
-//                    }
-//                }
-//                if (storageGranted) {
-//                    currentStage = STAGE_LOCATION;
-//                } else {
-//                    Toast.makeText(this, "Permissões de armazenamento são obrigatórias", Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//                break;
 
             case REQ_LOCATION:
                 boolean locationGranted = true;
@@ -229,9 +183,7 @@ public class RequestPermissionsActivity extends AppCompatActivity {
         requestNextMissingPermission();
     }
 
-    /**
-     * Avança para a DashboardActivity
-     */
+    //Avança para a DashboardActivity
     private void goToDashboard() {
         Intent intent = new Intent(this, DashboardActivity.class);
         startActivity(intent);

@@ -70,7 +70,6 @@ public class DashboardFragment extends Fragment {
     private void loadUserFromFirebase() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null) {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
             return;
         }
 

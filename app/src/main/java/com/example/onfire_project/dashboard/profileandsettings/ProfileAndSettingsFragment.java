@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,7 +68,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         return view;
     }
 
-    // 🔹 Carrega o utilizador atual e cria se não existir
+    // Carrega o utilizador atual e cria se não existir
     private void loadUserAndAtividades() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null || fbUser.getEmail() == null) {
@@ -96,7 +95,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         System.out.println("Atividades locais carregadas: " + atividades.size());
     }
 
-    // 🔹 Load user from Firebase and sync with SQLite + UI
+    // Carrega o utilizador do FireBase e sincroniza com o SQLite + UI
     private void loadUserFromFirebase() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null) {
@@ -112,9 +111,9 @@ public class ProfileAndSettingsFragment extends Fragment {
                 Pessoa p = snap.getValue(Pessoa.class);
                 if (p != null && p.email != null) {
                     currentUser = p;
-                    repo.savePessoa(p); // ✅ update SQLite
+                    repo.savePessoa(p); // Atualizar SQLite
 
-                    // ✅ update UI fields
+                    // Atualizar campos
                     binding.etFullName.setText(p.nome);
                     binding.etEmail.setText(p.email);
                     binding.etAge.setText(p.dataNascimento);
@@ -211,21 +210,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         });
     }
 
-    // 🔹 Auto update on typing
-//    private void setupAutoUpdate() {
-//        TextWatcher watcher = new TextWatcher() {
-//            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-//            @Override public void afterTextChanged(Editable s) {
-//                savePersonalInfo();
-//            }
-//        };
-//        binding.etFullName.addTextChangedListener(watcher);
-//        binding.etWeight.addTextChangedListener(watcher);
-//        binding.etHeight.addTextChangedListener(watcher);
-//    }
-
-    // 🔹 Save info to Firebase + SQLite
+    // Salvar informações na Base Local e no Firebase
     private void savePersonalInfo() {
         String name = Objects.requireNonNull(binding.etFullName.getText()).toString().trim();
         String birthDate = Objects.requireNonNull(binding.etAge.getText()).toString().trim();
@@ -286,7 +271,7 @@ public class ProfileAndSettingsFragment extends Fragment {
                 .addOnFailureListener(e -> toast("Failed to save Firebase: " + e.getMessage()));
     }
 
-    // 🔹 Edit password and email
+    // Salvar credenciais
     private void saveCredentials() {
         String email = Objects.requireNonNull(binding.etEmail.getText()).toString().trim();
         String oldPass = Objects.requireNonNull(binding.etCurrentPass.getText()).toString().trim();
@@ -325,12 +310,12 @@ public class ProfileAndSettingsFragment extends Fragment {
                 .addOnSuccessListener(aVoid -> {
                     boolean emailChanged = !email.equalsIgnoreCase(fbUser.getEmail());
 
-                    // 🔹 1. Update password immediately
+                    // Atualiza utilizador no Firebase Database
                     fbUser.updatePassword(newPass)
                             .addOnSuccessListener(aVoid1 -> toast("Password Updated"))
                             .addOnFailureListener(e -> toast("Password update failed: " + e.getMessage()));
 
-                    // 🔹 2. Send verification link for new email
+                    // Verificação do utilizador por e-mail
                     if (emailChanged) {
                         fbUser.verifyBeforeUpdateEmail(email)
                                 .addOnSuccessListener(unused -> {
@@ -366,7 +351,7 @@ public class ProfileAndSettingsFragment extends Fragment {
         return null;
     }
 
-    // 🔹 Sync atividades Firebase ↔ SQLite
+    // Sincronizar Firebase e SQLite
     private void syncAtividades() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null || fbUser.getEmail() == null) {
@@ -445,7 +430,7 @@ public class ProfileAndSettingsFragment extends Fragment {
             remoteKeys.add(a.data + "_" + a.tempo + "_" + a.tipoAtividade);
         }
 
-        // 🔹 Puxa novas do Firebase -> adiciona ao SQLite se não existirem
+        // Puxa novas do Firebase -> adiciona ao SQLite se não existirem
         for (Atividade a : remoteList) {
             String key = a.data + "_" + a.tempo + "_" + a.tipoAtividade;
             if (!localKeys.contains(key)) {
@@ -457,7 +442,7 @@ public class ProfileAndSettingsFragment extends Fragment {
             }
         }
 
-        // 🔹 Sobe novas do SQLite -> adiciona ao Firebase se não existirem
+        // Sobe novas do SQLite -> adiciona ao Firebase se não existirem
         for (Atividade a : localList) {
             String key = a.data + "_" + a.tempo + "_" + a.tipoAtividade;
             if (!remoteKeys.contains(key)) {
@@ -465,7 +450,7 @@ public class ProfileAndSettingsFragment extends Fragment {
             }
         }
 
-        // 🔹 Caso especial: SQLite vazio → importa tudo do Firebase
+        // Caso especial: SQLite vazio → importa tudo do Firebase
         if (localList.isEmpty() && !remoteList.isEmpty()) {
             int pessoaId = repo.getPessoaByEmail(currentUser.email).id;
             for (Atividade a : remoteList) {
@@ -486,6 +471,7 @@ public class ProfileAndSettingsFragment extends Fragment {
                 .show();
     }
 
+    //Eliminar conta, eliminando a conta na autenticação, dados SQLite e Firebase Database, e encerrar sessão
     private void deleteAccountForever() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null || fbUser.getEmail() == null) {

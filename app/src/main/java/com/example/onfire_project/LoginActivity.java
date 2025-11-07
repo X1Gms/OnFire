@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
             String email = etEmail.getText().toString().trim();
             String pass = etPassword.getText().toString().trim();
 
+            //Validações de Inputs
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Invalid email", Toast.LENGTH_SHORT).show();
                 return;
@@ -74,6 +75,8 @@ public class LoginActivity extends AppCompatActivity {
         String savedPassword = sharedPreferences.getString(KEY_PASSWORD, null);
         boolean autoLoginEnabled = sharedPreferences.getBoolean(KEY_AUTO_LOGIN_ENABLED, true);
 
+        //Verifica se as credenciais estão guardadas no SharedPreferences e se o utilizador consegue
+        //se autenticar
         if (savedEmail != null && savedPassword != null && autoLoginEnabled) {
             // Tem credenciais salvas → esconde o layout e faz login automático
             showLoginUI(false);
@@ -95,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void performLogin(String email, String password, boolean saveCredentials) {
         showLoading(true);
-
+        //Fazer autenticação no Firebase
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -119,11 +122,12 @@ public class LoginActivity extends AppCompatActivity {
                             clearSavedCredentials();
                         }
 
-                        Toast.makeText(this, "E-mail or password incorrect", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "E-mail or password Incorrect", Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
+    //Salvar credenciais nas preferências
     private void saveLoginCredentials(String email, String password) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(KEY_EMAIL, email);
@@ -132,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    //Limpar as credenciais nas preferências
     private void clearSavedCredentials() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KEY_EMAIL);
@@ -139,12 +144,14 @@ public class LoginActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    //Mostrar UI de Login
     private void showLoginUI(boolean show) {
         if (linearLayout != null) {
             linearLayout.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
 
+    //Mostrar Loading
     private void showLoading(boolean show) {
         MaterialButton btnLogin = findViewById(R.id.btnLogin);
         TextView tvForgot = findViewById(R.id.tvForgot);

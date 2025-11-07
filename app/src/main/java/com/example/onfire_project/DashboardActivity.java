@@ -23,9 +23,13 @@ import androidx.appcompat.app.AppCompatActivity;
 public class DashboardActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
+    //Menu Principal Lateral com as opções
     private NavigationView navViewMain;
+    //Menu Lateral
     private DrawerLayout drawer;
+    //Objeto que gera a navegação entre fragmentos
     private NavController navController;
+    //Verificar último elemento selecionado
     private MenuItem lastSelectedMenuItem;
     private static final String KEY_EMAIL = "saved_email";
     private static final String KEY_PASSWORD = "saved_password";
@@ -37,13 +41,14 @@ public class DashboardActivity extends AppCompatActivity {
 
         ActivityDashboardBinding binding = ActivityDashboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        //Toolbar como barra de ação
         setSupportActionBar(binding.appBarDashboard.toolbar);
 
         drawer = binding.drawerLayout;
         navViewMain = binding.navViewMain;
         NavigationView navViewBottom = binding.navViewBottom;
 
+        //Define os destinos dos fragmentos
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_dashboard, R.id.nav_history, R.id.nav_profile_and_settings)
                 .setOpenableLayout(drawer)
@@ -55,6 +60,7 @@ public class DashboardActivity extends AppCompatActivity {
         // Configurar manualmente a navegação sem usar NavigationUI para o NavigationView
         setupCustomNavigation();
 
+        //Define comportamento do menu inferior
         navViewBottom.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_sign_out) {
                 handleSignOut();
@@ -70,12 +76,14 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+
     private void setupCustomNavigation() {
         navViewMain.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
             drawer.closeDrawer(GravityCompat.START);
 
+            //Abre a RunningActivity
             if (id == R.id.nav_start_exercise) {
                 // Redirecionar para a Activity de exercício SEM marcar como selecionado
                 Intent intent = new Intent(DashboardActivity.this, RunningActivity.class);
@@ -106,6 +114,7 @@ public class DashboardActivity extends AppCompatActivity {
         });
     }
 
+    //Atualiza visualmente o item selecionado
     private void setSelectedMenuItem(int menuItemId) {
         Menu menu = navViewMain.getMenu();
 
@@ -123,6 +132,7 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+    //Processo de Log Out
     private void handleSignOut() {
         // 1. Fazer sign out do Firebase Auth
         FirebaseAuth.getInstance().signOut();
@@ -158,6 +168,8 @@ public class DashboardActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    //Quando retornar à DashboardActivity, retorna ao item anterior, antes de ter ido
+    //para a RunnignActivity
     @Override
     protected void onResume() {
         super.onResume();

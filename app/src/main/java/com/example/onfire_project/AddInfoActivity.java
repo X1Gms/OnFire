@@ -3,7 +3,6 @@ package com.example.onfire_project;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -116,7 +115,6 @@ public class AddInfoActivity extends AppCompatActivity {
     }
 
     private void saveUserInfo() {
-        Log.d("AddInfoActivity", "saveUserInfo() triggered");
         String name = etFullName.getText().toString().trim();
         String birthDateStr = etBirthDate.getText().toString().trim();
         String sex = (String) spSex.getSelectedItem();
@@ -167,7 +165,6 @@ public class AddInfoActivity extends AppCompatActivity {
         pessoa.altura = h;
         pessoa.peso = w;
         pessoa.email = email;
-        Log.d("","Aqui fui");
         localDb.insertOrUpdatePessoa(pessoa);
 
         // guarda na Firebase
@@ -178,13 +175,9 @@ public class AddInfoActivity extends AppCompatActivity {
         userMap.put("height", h);
         userMap.put("weight", w);
         userMap.put("email", email);
-        Log.d("","Aqui fui 2");
 
         dbRef.child(uid).child("info").setValue(userMap)
                 .addOnSuccessListener(unused -> {
-                    for (Map.Entry<String, Object> entry : userMap.entrySet()) {
-                        Log.d("FirebaseUpload", entry.getKey() + " -> " + entry.getValue());
-                    }
                     toast("Saved Successfully!");
                     Intent intent = new Intent(AddInfoActivity.this, RequestPermissionsActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

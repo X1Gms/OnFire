@@ -1,6 +1,8 @@
 package com.example.onfire_project.dashboard.history;
 
 public class HistoryItem {
+
+    //Propriedades que uma atividade de corrida tem
     public String type;
     public String pace;
     public double speed;

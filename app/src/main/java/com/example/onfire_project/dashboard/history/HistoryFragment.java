@@ -74,7 +74,7 @@ public class HistoryFragment extends Fragment {
     private void loadUserAndAtividades() {
         FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
         if (fbUser == null || fbUser.getEmail() == null) {
-            Toast.makeText(getContext(), "Usuário não logado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Utilizador não logado", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -112,6 +112,7 @@ public class HistoryFragment extends Fragment {
 
     // ------------------------------------------------------------------------
 
+    //Mapeamento dos dados recebidos para cada item criado no RecycleView
     private HistoryItem mapAtividadeToHistoryItem(Atividade a) {
         String type = a.tipoAtividade != null ? a.tipoAtividade.toLowerCase() : "";
         String paceStr = a.ritmo > 0 ? String.format("%.2f", a.ritmo) : "";
@@ -132,6 +133,7 @@ public class HistoryFragment extends Fragment {
 
     // ------------------------------------------------------------------------
 
+    //Atualizar estilos dos botões à medida que forem clicados (clicado, o destacado)
     private void updateButtonStyles(List<MaterialButton> buttons, MaterialButton selected) {
         int colorPrimary = ContextCompat.getColor(requireContext(), R.color.primary);
         int colorBackground = ContextCompat.getColor(requireContext(), R.color.background);
@@ -151,6 +153,7 @@ public class HistoryFragment extends Fragment {
         }
     }
 
+    //Filtrar pelos botões, através da propriedade de tipo de atividade (type)
     private void filterListByButton(MaterialButton btn) {
         int id = btn.getId();
         ArrayList<HistoryItem> filtered = new ArrayList<>();
