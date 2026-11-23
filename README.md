@@ -61,4 +61,8 @@ The project was developed using Java and Android Studio as part of my mobile dev
 
 ## Author
 
-Developed by [Gonçalo Santos](https://github.com/X1Gms).
+Developed by:
+- [Gonçalo Santos](https://github.com/X1Gms);
+- [Flávio Beja](https://github.com/GhostFaith);
+- [Guilherme Banha](https://github.com/guilhermebanha);
+- [João Gonçalves](https://github.com/Tellay);
